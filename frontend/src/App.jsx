@@ -230,82 +230,38 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      <style>{`
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
-
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
-
-      <div className="relative max-w-6xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-lg opacity-75"></div>
-              <div className="relative bg-gradient-to-r from-indigo-600 to-purple-600 p-4 rounded-full shadow-xl">
-                <Briefcase className="w-12 h-12 text-white" />
-              </div>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <Briefcase className="w-12 h-12 text-blue-600" />
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold text-slate-800 mb-2">
             AI Resume & Cover Letter Generator
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Transform your application materials with AI-powered optimization. Get hired faster with tailored resumes and cover letters.
+          <p className="text-slate-600">
+            Optimize your application materials for any job in seconds
           </p>
-          <div className="flex items-center justify-center gap-6 mt-6">
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Powered by Claude AI</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>ATS Optimized</span>
-            </div>
-          </div>
         </div>
 
         {error && (
-          <div className="mb-8 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl p-6 flex items-start shadow-lg">
-            <div className="bg-red-100 p-2 rounded-lg mr-4">
-              <AlertCircle className="w-6 h-6 text-red-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-red-800 mb-1">Oops! Something went wrong</h3>
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
+            <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-red-700">{error}</div>
           </div>
         )}
 
         {!results && (
-          <div className="bg-white bg-opacity-80 backdrop-blur-sm rounded-3xl shadow-2xl p-10 mb-8 border border-purple-100">
-            <div className="space-y-8">
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-2xl p-8 shadow-inner">
-                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 flex items-center">
-                  <FileText className="w-6 h-6 text-indigo-600 mr-3" />
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                  <FileText className="w-5 h-5 text-blue-600 mr-2" />
                   Application Tracking
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                       Company Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -313,22 +269,22 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                       placeholder="e.g., Google, Microsoft"
                       value={formData.companyName}
                       onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
-                      className="w-full px-5 py-4 border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition bg-white shadow-sm"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                       Date Applied
                     </label>
                     <input
                       type="date"
                       value={formData.dateApplied}
                       onChange={(e) => setFormData(prev => ({ ...prev, dateApplied: e.target.value }))}
-                      className="w-full px-5 py-4 border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition bg-white shadow-sm"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                       Resume Name (Optional)
                     </label>
                     <input
@@ -336,14 +292,14 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                       placeholder="Auto-generated if empty"
                       value={formData.resumeName}
                       onChange={(e) => setFormData(prev => ({ ...prev, resumeName: e.target.value }))}
-                      className="w-full px-5 py-4 border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition bg-white shadow-sm"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-3">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Role Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -351,12 +307,12 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                   placeholder="e.g., Cybersecurity Consultant, Senior GRC Analyst"
                   value={formData.roleTitle}
                   onChange={(e) => setFormData(prev => ({ ...prev, roleTitle: e.target.value }))}
-                  className="w-full px-5 py-4 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition shadow-sm"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-3">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Job Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -364,7 +320,7 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                   value={formData.jobDescription}
                   onChange={(e) => setFormData(prev => ({ ...prev, jobDescription: e.target.value }))}
                   rows={8}
-                  className="w-full px-5 py-4 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition resize-none shadow-sm"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
                 />
               </div>
 
@@ -415,17 +371,17 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
               <button
                 onClick={generateOptimizedContent}
                 disabled={isGenerating}
-                className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold py-5 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {isGenerating ? (
                   <>
-                    <Loader2 className="w-6 h-6 mr-3 animate-spin" />
-                    <span className="text-lg">Generating Your Optimized Materials...</span>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Generating Your Optimized Materials...
                   </>
                 ) : (
                   <>
-                    <FileText className="w-6 h-6 mr-3" />
-                    <span className="text-lg">Generate Optimized Resume & Cover Letter</span>
+                    <FileText className="w-5 h-5 mr-2" />
+                    Generate Optimized Resume & Cover Letter
                   </>
                 )}
               </button>
@@ -434,87 +390,83 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
         )}
 
         {results && (
-          <div className="space-y-8">
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6 flex items-start shadow-lg">
-              <div className="bg-green-100 p-3 rounded-xl mr-4">
-                <CheckCircle className="w-7 h-7 text-green-600" />
-              </div>
+          <div className="space-y-6">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start">
+              <CheckCircle className="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-bold text-green-800 text-lg mb-2">
-                  🎉 Generation Complete!
+                <h3 className="font-semibold text-green-800 mb-1">
+                  Generation Complete!
                 </h3>
                 <p className="text-sm text-green-700">
-                  Your optimized resume and cover letter are ready for download. Good luck with your application!
+                  Your optimized resume and cover letter are ready for download.
                 </p>
               </div>
             </div>
 
-            <div className="bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-indigo-100">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center">
-                <CheckCircle className="w-7 h-7 text-indigo-600 mr-3" />
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-bold text-slate-800 mb-3 flex items-center">
+                <CheckCircle className="w-6 h-6 text-blue-600 mr-2" />
                 Recruiter Feedback Summary
               </h2>
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
-                <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                  {results.feedback}
-                </p>
-              </div>
+              <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                {results.feedback}
+              </p>
             </div>
 
-            <div className="bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-purple-100">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center">
-                  <FileText className="w-7 h-7 text-purple-600 mr-3" />
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center">
+                  <FileText className="w-6 h-6 text-blue-600 mr-2" />
                   Optimized Resume
                 </h2>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <button
                     onClick={() => downloadAsFile(results.optimizedResume, 'optimized-resume', 'docx')}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center"
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="w-4 h-4 mr-1" />
                     DOCX
                   </button>
                   <button
                     onClick={() => downloadAsFile(results.optimizedResume, 'optimized-resume', 'pdf')}
-                    className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white text-sm font-bold rounded-xl transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition flex items-center"
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="w-4 h-4 mr-1" />
                     PDF
                   </button>
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-xl p-6 border-2 border-slate-200 max-h-96 overflow-y-auto">
+              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200 max-h-96 overflow-y-auto">
                 <pre className="whitespace-pre-wrap text-sm text-slate-700 font-sans">
                   {results.optimizedResume}
                 </pre>
               </div>
             </div>
 
-            <div className="bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-pink-100">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent flex items-center">
-                  <FileText className="w-7 h-7 text-pink-600 mr-3" />
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center">
+                  <FileText className="w-6 h-6 text-blue-600 mr-2" />
                   Customized Cover Letter
                 </h2>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <button
                     onClick={() => downloadAsFile(results.coverLetter, 'cover-letter', 'docx')}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center"
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="w-4 h-4 mr-1" />
                     DOCX
                   </button>
                   <button
                     onClick={() => downloadAsFile(results.coverLetter, 'cover-letter', 'pdf')}
-                    className="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white text-sm font-bold rounded-xl transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition flex items-center"
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="w-4 h-4 mr-1" />
                     PDF
                   </button>
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-slate-50 to-pink-50 rounded-xl p-6 border-2 border-slate-200 max-h-96 overflow-y-auto">
+              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200 max-h-96 overflow-y-auto">
                 <pre className="whitespace-pre-wrap text-sm text-slate-700 font-sans">
                   {results.coverLetter}
                 </pre>
@@ -537,7 +489,7 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                 setUploadedFileName('');
                 setIsUsingDefaultResume(true);
               }}
-              className="w-full bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="w-full bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 rounded-lg transition"
             >
               Start Over with New Application
             </button>
