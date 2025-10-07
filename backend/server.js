@@ -7,37 +7,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// CORS Configuration
-app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    
-    // Allow all Vercel domains and localhost
-    if (
-      origin.includes('.vercel.app') || 
-      origin.includes('localhost')
-    ) {
-      return callback(null, true);
-    }
-    
-    // Block other origins
-    callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
+// Middleware - Simple CORS (allows all origins)
+app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// Handle preflight requests explicitly
-app.options('*', cors());
-
+// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
+// Generate optimized resume endpoint
 app.post('/api/generate', async (req, res) => {
   try {
     const { jobDescription, currentResume, roleTitle } = req.body;
@@ -139,6 +118,7 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
   }
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`\n✅ Backend Server Running!`);
   console.log(`📍 URL: http://localhost:${PORT}`);
