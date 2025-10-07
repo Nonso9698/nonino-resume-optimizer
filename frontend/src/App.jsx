@@ -1,4 +1,19 @@
-import React, { useState } from 'react';
+export default function ResumeOptimizerApp() {
+  const [formData, setFormData] = useState({
+    jobDescription: '',
+    currentResume: DEFAULT_RESUME,
+    roleTitle: '',
+    companyName: '',
+    dateApplied: new Date().toISOString().split('T')[0],
+    resumeName: ''
+  });
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [results, setResults] = useState(null);
+  const [error, setError] = useState(null);
+  const [uploadedFileName, setUploadedFileName] = useState('');
+  const [isUsingDefaultResume, setIsUsingDefaultResume] = useState(true);
+
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'import React, { useState } from 'react';
 import { FileText, Briefcase, Upload, Loader2, Download, CheckCircle, AlertCircle } from 'lucide-react';
 
 const DEFAULT_RESUME = `KING N. IHE., CISA
@@ -15,51 +30,51 @@ PROFESSIONAL EXPERIENCE
 GRC Consultant
 Octasquare Inc | Charlotte, NC (Remote) | June 2024 – Present
 
-- Conduct comprehensive HITRUST risk assessments across 6 healthcare client environments, identifying access control vulnerabilities and data encryption gaps while developing prioritized remediation roadmaps that reduced vulnerability exposure by 25%
-- Led standardization of third-party vendor risk evaluation processes for 50+ critical suppliers, developing risk scoring methodology that decreased assessment cycle time from 45 to 30 days
-- Execute PCI DSS compliance gap analyses for payment processing environments, documenting control deficiencies and collaborating with IT teams and business owners on remediation activities with 85% closure rate within regulatory timelines
-- Built real-time risk monitoring dashboards in Splunk, eliminating 35% of manual reporting tasks and providing executive visibility into compliance metrics across client portfolios
+• Conduct comprehensive HITRUST risk assessments across 6 healthcare client environments, identifying access control vulnerabilities and data encryption gaps while developing prioritized remediation roadmaps that reduced vulnerability exposure by 25%
+• Led standardization of third-party vendor risk evaluation processes for 50+ critical suppliers, developing risk scoring methodology that decreased assessment cycle time from 45 to 30 days
+• Execute PCI DSS compliance gap analyses for payment processing environments, documenting control deficiencies and collaborating with IT teams and business owners on remediation activities with 85% closure rate within regulatory timelines
+• Built real-time risk monitoring dashboards in Splunk, eliminating 35% of manual reporting tasks and providing executive visibility into compliance metrics across client portfolios
 
 Information Security Compliance Specialist
 Bank of America | Charlotte, NC | March 2023 – June 2024
 
-- Managed ServiceNow GRC platform operations within 8-person risk team, serving 200+ users across audit and risk functions while deploying automated workflows that reduced manual documentation by 30%
-- Coordinated OCC regulatory examination preparation across 15 business units under senior manager oversight, managing control testing documentation and artifact collection that resulted in zero critical findings
-- Monitored SOX IT General Controls program covering 250+ quarterly control tests within $2.4 trillion asset bank, maintaining 95% compliance with Sarbanes-Oxley and BSA/AML regulatory requirements
-- Coordinated meetings with audit, risk, and business teams, improving examination response time by 40% and standardizing evidence collection processes across the enterprise
+• Managed ServiceNow GRC platform operations within 8-person risk team, serving 200+ users across audit and risk functions while deploying automated workflows that reduced manual documentation by 30%
+• Coordinated OCC regulatory examination preparation across 15 business units under senior manager oversight, managing control testing documentation and artifact collection that resulted in zero critical findings
+• Monitored SOX IT General Controls program covering 250+ quarterly control tests within $2.4 trillion asset bank, maintaining 95% compliance with Sarbanes-Oxley and BSA/AML regulatory requirements
+• Coordinated meetings with audit, risk, and business teams, improving examination response time by 40% and standardizing evidence collection processes across the enterprise
 
 Internal Audit and Compliance Specialist
 Wells Fargo | Charlotte, NC | December 2019 – August 2023
 
-- Managed third-party vendor risk assessment program covering 500+ relationships within 12-person compliance team at $1.9 trillion asset institution, developing automated risk scoring that reduced initial evaluation time from 8 to 5 business days
-- Deployed ISO 27001-aligned security control framework across technology operations, training 150+ staff and achieving 90% adoption rate within 18 months under director supervision
-- Performed quarterly IT General Controls testing for 12 critical applications, identifying and tracking remediation of control deficiencies with business process owners and achieving 88% resolution rate
-- Contributed to SOC 2 Type II audit processes through detailed control documentation and testing evidence, maintaining clean audit opinions across 8 business areas
+• Managed third-party vendor risk assessment program covering 500+ relationships within 12-person compliance team at $1.9 trillion asset institution, developing automated risk scoring that reduced initial evaluation time from 8 to 5 business days
+• Deployed ISO 27001-aligned security control framework across technology operations, training 150+ staff and achieving 90% adoption rate within 18 months under director supervision
+• Performed quarterly IT General Controls testing for 12 critical applications, identifying and tracking remediation of control deficiencies with business process owners and achieving 88% resolution rate
+• Contributed to SOC 2 Type II audit processes through detailed control documentation and testing evidence, maintaining clean audit opinions across 8 business areas
 
 CERTIFICATIONS
-- Certified Information Systems Auditor (CISA)
-- CompTIA Security+ (SY0-701)
-- AWS Certified Solutions Architect – Associate (SAA-C03)
-- Microsoft Certified: Azure Fundamentals (AZ-900)
-- Google Project Management Professional Certificate
-- Certified in Cybersecurity
+• Certified Information Systems Auditor (CISA)
+• CompTIA Security+ (SY0-701)
+• AWS Certified Solutions Architect – Associate (SAA-C03)
+• Microsoft Certified: Azure Fundamentals (AZ-900)
+• Google Project Management Professional Certificate
+• Certified in Cybersecurity
 
 EDUCATION
-- Master of Science, Information Technology Management
+• Master of Science, Information Technology Management
 Western Governors University | Salt Lake City, UT | 2020-2021
-- Bachelor of Science, Real Estate Management
+• Bachelor of Science, Real Estate Management
 Abia State University | Uturu, | 2012
 
 KEY ACHIEVEMENTS
-- Reduced vendor risk assessment cycle time by 33% through automated scoring implementation
-- Decreased regulatory examination preparation time by 40% via standardized documentation processes
-- Eliminated 30-35% of manual reporting tasks through workflow automation and dashboard development
-- Maintained 95% SOX control testing completion rate across 250+ quarterly assessments
-- Achieved 85-88% deficiency remediation closure rate within established regulatory timelines
-- Successfully supported zero critical findings during federal OCC examination
-- Managed risk assessment operations for 500+ third-party vendor relationships
-- Led security control framework adoption achieving 90% organizational implementation rate
-- Supported clean SOC 2 Type II audit opinions across multiple business processes
+• Reduced vendor risk assessment cycle time by 33% through automated scoring implementation
+• Decreased regulatory examination preparation time by 40% via standardized documentation processes
+• Eliminated 30-35% of manual reporting tasks through workflow automation and dashboard development
+• Maintained 95% SOX control testing completion rate across 250+ quarterly assessments
+• Achieved 85-88% deficiency remediation closure rate within established regulatory timelines
+• Successfully supported zero critical findings during federal OCC examination
+• Managed risk assessment operations for 500+ third-party vendor relationships
+• Led security control framework adoption achieving 90% organizational implementation rate
+• Supported clean SOC 2 Type II audit opinions across multiple business processes
 
 TECHNICAL SKILLS
 ServiceNow GRC (Administration & Workflow Design) • RSA Archer • AuditBoard • Splunk (Dashboard Creation & Analytics) • Nessus Professional • Qualys VMDR • AWS Security Services (IAM, CloudTrail, GuardDuty) • Microsoft Azure Security Center • Advanced Excel (Pivot Tables, Macros, Statistical Analysis) • SQL Database Queries • Power BI`;
@@ -68,10 +83,7 @@ export default function ResumeOptimizerApp() {
   const [formData, setFormData] = useState({
     jobDescription: '',
     currentResume: DEFAULT_RESUME,
-    roleTitle: '',
-    companyName: '',
-    dateApplied: new Date().toISOString().split('T')[0],
-    resumeName: ''
+    roleTitle: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState(null);
@@ -79,6 +91,7 @@ export default function ResumeOptimizerApp() {
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [isUsingDefaultResume, setIsUsingDefaultResume] = useState(true);
 
+  // Backend API URL - change this when deploying
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   const handleFileUpload = async (e) => {
@@ -92,7 +105,7 @@ export default function ResumeOptimizerApp() {
       const text = await file.text();
       setFormData(prev => ({ ...prev, currentResume: text }));
     } else {
-      alert('For this demo, please use .txt files or paste your resume text directly.');
+      alert('For this demo, please use .txt files or paste your resume text directly. PDF/DOCX parsing requires backend setup.');
     }
   };
 
@@ -117,6 +130,7 @@ export default function ResumeOptimizerApp() {
     setError(null);
 
     try {
+      // Call our secure backend
       const response = await fetch(`${API_URL}/api/generate`, {
         method: 'POST',
         headers: {
@@ -148,7 +162,7 @@ export default function ResumeOptimizerApp() {
     }
   };
 
-  const downloadAsFile = (content, filename) => {
+  const downloadAsFile = (content, filename, format = 'docx') => {
     // Add tracking info at the top of the file
     const trackingInfo = `=================================
 TRACKING INFORMATION
@@ -161,26 +175,88 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
 
 `;
     const contentWithTracking = trackingInfo + content;
-    const blob = new Blob([contentWithTracking], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
     
     // Auto-generate filename with tracking info
     const safeCompanyName = formData.companyName.replace(/[^a-z0-9]/gi, '_');
     const safeRoleName = formData.roleTitle.replace(/[^a-z0-9]/gi, '_');
-    const customFilename = filename.includes('resume') 
-      ? `${safeCompanyName}_${safeRoleName}_Resume_${formData.dateApplied}.txt`
-      : `${safeCompanyName}_${safeRoleName}_CoverLetter_${formData.dateApplied}.txt`;
+    const baseFilename = filename.includes('resume') 
+      ? `${safeCompanyName}_${safeRoleName}_Resume_${formData.dateApplied}`
+      : `${safeCompanyName}_${safeRoleName}_CoverLetter_${formData.dateApplied}`;
     
-    a.download = customFilename;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (format === 'pdf') {
+      // For PDF, we'll create a simple HTML and use browser print
+      const printWindow = window.open('', '_blank');
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${baseFilename}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 40px;
+              line-height: 1.6;
+              color: #333;
+            }
+            pre {
+              white-space: pre-wrap;
+              word-wrap: break-word;
+              font-family: Arial, sans-serif;
+              font-size: 11pt;
+            }
+            .tracking-info {
+              background: #f0f0f0;
+              padding: 15px;
+              border-radius: 5px;
+              margin-bottom: 20px;
+            }
+            @media print {
+              body { margin: 20mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <pre>${contentWithTracking}</pre>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 100);
+            }
+          </script>
+        </body>
+        </html>
+      `;
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+    } else if (format === 'docx') {
+      // Create basic DOCX structure (simple XML format)
+      const docxContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    <w:p>
+      <w:r>
+        <w:t xml:space="preserve">${contentWithTracking.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">')}</w:t>
+      </w:r>
+    </w:p>
+  </w:body>
+</w:document>`;
+      
+      const blob = new Blob([docxContent], { 
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${baseFilename}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Briefcase className="w-12 h-12 text-blue-600" />
@@ -193,61 +269,23 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
           </p>
         </div>
 
+        {/* Error Display */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
-            <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-red-700">{error}</div>
+          <div className="mb-8 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl p-6 flex items-start shadow-lg">
+            <div className="bg-red-100 p-2 rounded-lg mr-4">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-red-800 mb-1">Oops! Something went wrong</h3>
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
           </div>
         )}
 
+        {/* Input Form */}
         {!results && (
           <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
             <div className="space-y-6">
-              {/* Tracking Information Section */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-                  <FileText className="w-5 h-5 text-blue-600 mr-2" />
-                  Application Tracking
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Company Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., Google, Microsoft"
-                      value={formData.companyName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Date Applied
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.dateApplied}
-                      onChange={(e) => setFormData(prev => ({ ...prev, dateApplied: e.target.value }))}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Resume Name (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Auto-generated if empty"
-                      value={formData.resumeName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, resumeName: e.target.value }))}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                    />
-                  </div>
-                </div>
-              </div>
-
               {/* Role Title */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -262,8 +300,9 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                 />
               </div>
 
+              {/* Job Description */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-3">
                   Job Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -271,10 +310,11 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                   value={formData.jobDescription}
                   onChange={(e) => setFormData(prev => ({ ...prev, jobDescription: e.target.value }))}
                   rows={8}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
+                  className="w-full px-5 py-4 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition resize-none shadow-sm"
                 />
               </div>
 
+              {/* Current Resume */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-sm font-semibold text-slate-700">
@@ -319,20 +359,21 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                 />
               </div>
 
+              {/* Generate Button */}
               <button
                 onClick={generateOptimizedContent}
                 disabled={isGenerating}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold py-5 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5"
               >
                 {isGenerating ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Generating Your Optimized Materials...
+                    <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                    <span className="text-lg">Generating Your Optimized Materials...</span>
                   </>
                 ) : (
                   <>
-                    <FileText className="w-5 h-5 mr-2" />
-                    Generate Optimized Resume & Cover Letter
+                    <FileText className="w-6 h-6 mr-3" />
+                    <span className="text-lg">Generate Optimized Resume & Cover Letter</span>
                   </>
                 )}
               </button>
@@ -340,8 +381,10 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
           </div>
         )}
 
+        {/* Results Display */}
         {results && (
           <div className="space-y-6">
+            {/* Success Message */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start">
               <CheckCircle className="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
               <div>
@@ -354,6 +397,7 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
               </div>
             </div>
 
+            {/* Recruiter Feedback */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-xl font-bold text-slate-800 mb-3 flex items-center">
                 <CheckCircle className="w-6 h-6 text-blue-600 mr-2" />
@@ -364,6 +408,7 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
               </p>
             </div>
 
+            {/* Optimized Resume */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center">
@@ -385,6 +430,7 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
               </div>
             </div>
 
+            {/* Cover Letter */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center">
@@ -406,6 +452,7 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
               </div>
             </div>
 
+            {/* Start Over Button */}
             <button
               onClick={() => {
                 setResults(null);
