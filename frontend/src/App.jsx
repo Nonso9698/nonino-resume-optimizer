@@ -180,7 +180,7 @@ export default function NoninoResumeOptimizer() {
   const lines = text.split('\n');
   const paragraphs = [];
   let isFirstLine = true;
-  let previousLineWasEducationHeader = false;
+  let inEducationSection = false;
   
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
@@ -189,7 +189,7 @@ export default function NoninoResumeOptimizer() {
     if (trimmedLine === '') {
       paragraphs.push(new Paragraph({ 
         text: "",
-        spacing: { after: 50 }  // Reduced from 100
+        spacing: { after: 50 }
       }));
       return;
     }
@@ -205,7 +205,7 @@ export default function NoninoResumeOptimizer() {
           font: "Calibri"
         })],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 150 }  // Reduced from 200
+        spacing: { after: 150 }
       }));
       return;
     }
@@ -219,7 +219,7 @@ export default function NoninoResumeOptimizer() {
           font: "Calibri"
         })],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 150 }  // Reduced from 200
+        spacing: { after: 150 }
       }));
       return;
     }
@@ -230,8 +230,8 @@ export default function NoninoResumeOptimizer() {
         !trimmedLine.startsWith('-') &&
         !trimmedLine.includes('|')) {
       
-      // Check if this is EDUCATION section
-      previousLineWasEducationHeader = trimmedLine.includes('EDUCATION');
+      // Track if we're in EDUCATION section
+      inEducationSection = trimmedLine.includes('EDUCATION');
       
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
@@ -241,45 +241,44 @@ export default function NoninoResumeOptimizer() {
           font: "Calibri",
           color: "1E3A8A"
         })],
-        spacing: { before: 150, after: 80 }  // Reduced spacing
+        spacing: { before: 150, after: 80 }
       }));
       return;
     }
     
-    // School names (after EDUCATION header) - Shaded background
-    if (previousLineWasEducationHeader && !trimmedLine.startsWith('-')) {
-      previousLineWasEducationHeader = false;
+    // School names (in EDUCATION section, before degree line)
+    if (inEducationSection && !trimmedLine.startsWith('-') && 
+        !trimmedLine.match(/bachelor|master|phd|associate|diploma|science|arts|technology|management/i) &&
+        !trimmedLine.includes('|')) {
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
           bold: true,
-          size: 22,
+          size: 23,  // Slightly larger than degree
           font: "Calibri"
         })],
-        shading: {
-          fill: "E5E7EB"  // Light gray background
-        },
         spacing: { before: 100, after: 30 }
       }));
       return;
     }
     
-    // Degree lines (under school - contains "Bachelor", "Master", etc)
-    if (trimmedLine.match(/bachelor|master|phd|associate|diploma/i) && !trimmedLine.includes('|')) {
+    // Degree lines (contains Bachelor, Master, etc) - smaller, under school
+    if (trimmedLine.match(/bachelor|master|phd|associate|diploma|science|arts|technology|management/i) && 
+        !trimmedLine.includes('|') && inEducationSection) {
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
           size: 20,  // Smaller than school name
-          font: "Calibri",
-          italics: true
+          font: "Calibri"
         })],
         spacing: { after: 80 }
       }));
       return;
     }
     
-    // Job title lines (contain company name with |) - SHADED
+    // Job title lines (contain company name with |)
     if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
+      inEducationSection = false;  // We're out of education section
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
@@ -287,16 +286,14 @@ export default function NoninoResumeOptimizer() {
           size: 22,
           font: "Calibri"
         })],
-        shading: {
-          fill: "DBEAFE"  // Light blue background (shaded)
-        },
-        spacing: { before: 120, after: 40 }  // Reduced spacing
+        spacing: { before: 120, after: 40 }
       }));
       return;
     }
     
     // Bullet points
     if (trimmedLine.startsWith('-')) {
+      inEducationSection = false;
       const bulletText = trimmedLine.substring(1).trim();
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
@@ -307,24 +304,24 @@ export default function NoninoResumeOptimizer() {
         bullet: {
           level: 0
         },
-        spacing: { after: 60 }  // Reduced from 100
+        spacing: { after: 60 }
       }));
       return;
     }
     
-    // Regular text
+    // Regular text (certifications, skills, etc)
     paragraphs.push(new Paragraph({
       children: [new TextRun({ 
         text: trimmedLine,
         size: 22,
         font: "Calibri"
       })],
-      spacing: { after: 60 }  // Reduced from 100
+      spacing: { after: 60 }
     }));
   });
   
   return paragraphs;
-  };
+};
 
   const openInWord = async (content, documentType) => {
     try {
