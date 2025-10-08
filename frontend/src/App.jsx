@@ -205,7 +205,7 @@ export default function NoninoResumeOptimizer() {
             border-radius: 8px;
             overflow: hidden;
           }
-          .toolbar {
+          .top-toolbar {
             background: #2563eb;
             color: white;
             padding: 15px 20px;
@@ -213,11 +213,11 @@ export default function NoninoResumeOptimizer() {
             justify-content: space-between;
             align-items: center;
           }
-          .toolbar h1 {
+          .top-toolbar h1 {
             font-size: 18px;
             font-weight: 600;
           }
-          .toolbar button {
+          .top-toolbar button {
             background: white;
             color: #2563eb;
             border: none;
@@ -228,9 +228,35 @@ export default function NoninoResumeOptimizer() {
             font-size: 14px;
             transition: all 0.2s;
           }
-          .toolbar button:hover {
+          .top-toolbar button:hover {
             background: #f0f0f0;
             transform: translateY(-1px);
+          }
+          .format-toolbar {
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 10px 20px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+          }
+          .format-btn {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #334155;
+          }
+          .format-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+          }
+          .format-btn:active {
+            background: #cbd5e1;
           }
           .editor {
             padding: 40px;
@@ -262,7 +288,7 @@ export default function NoninoResumeOptimizer() {
               background: white;
               padding: 0;
             }
-            .toolbar, .instructions { 
+            .top-toolbar, .format-toolbar, .instructions { 
               display: none; 
             }
             .container {
@@ -277,13 +303,29 @@ export default function NoninoResumeOptimizer() {
       </head>
       <body>
         <div class="container">
-          <div class="toolbar">
+          <div class="top-toolbar">
             <h1>📄 ${fileName}</h1>
             <button onclick="window.print()">💾 Save / Print</button>
           </div>
+          <div class="format-toolbar">
+            <button class="format-btn" onclick="document.execCommand('bold', false, null)" title="Bold (Ctrl+B)"><b>B</b></button>
+            <button class="format-btn" onclick="document.execCommand('italic', false, null)" title="Italic (Ctrl+I)"><i>I</i></button>
+            <button class="format-btn" onclick="document.execCommand('underline', false, null)" title="Underline (Ctrl+U)"><u>U</u></button>
+            <button class="format-btn" onclick="document.execCommand('strikeThrough', false, null)" title="Strikethrough"><s>S</s></button>
+            <span style="border-left: 1px solid #cbd5e1; margin: 0 5px;"></span>
+            <button class="format-btn" onclick="document.execCommand('justifyLeft', false, null)" title="Align Left">⬅ Left</button>
+            <button class="format-btn" onclick="document.execCommand('justifyCenter', false, null)" title="Align Center">↔ Center</button>
+            <button class="format-btn" onclick="document.execCommand('justifyRight', false, null)" title="Align Right">➡ Right</button>
+            <span style="border-left: 1px solid #cbd5e1; margin: 0 5px;"></span>
+            <button class="format-btn" onclick="document.execCommand('insertUnorderedList', false, null)" title="Bullet List">• List</button>
+            <button class="format-btn" onclick="document.execCommand('insertOrderedList', false, null)" title="Numbered List">1. List</button>
+            <span style="border-left: 1px solid #cbd5e1; margin: 0 5px;"></span>
+            <button class="format-btn" onclick="document.execCommand('undo', false, null)" title="Undo (Ctrl+Z)">↶ Undo</button>
+            <button class="format-btn" onclick="document.execCommand('redo', false, null)" title="Redo (Ctrl+Y)">↷ Redo</button>
+          </div>
           <div class="editor">
             <div class="instructions">
-              ✏️ <strong>Edit freely!</strong> You can modify the text below. Click "Save / Print" to save as PDF (Ctrl+P), or copy the text to save elsewhere.
+              ✏️ <strong>Edit freely!</strong> Use the formatting toolbar above or keyboard shortcuts (Ctrl+B for bold, Ctrl+I for italic, Ctrl+U for underline). Click "Save / Print" when ready to save as PDF.
             </div>
             <div id="content" contenteditable="true">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
           </div>
