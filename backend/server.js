@@ -20,7 +20,7 @@ app.get('/api/health', (req, res) => {
 app.post('/api/generate', async (req, res) => {
   try {
     const { jobDescription, currentResume, roleTitle } = req.body;
-
+    
     if (!jobDescription || !currentResume || !roleTitle) {
       return res.status(400).json({ 
         error: 'Missing required fields' 
@@ -100,7 +100,7 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
     }
 
     console.log('✅ Generation complete!');
-
+    
     res.json({
       success: true,
       data: {
@@ -109,7 +109,6 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
         feedback: parsedContent.feedback
       }
     });
-
   } catch (error) {
     console.error('❌ Error:', error.message);
     res.status(500).json({ 
@@ -118,10 +117,15 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`\n✅ Backend Server Running!`);
-  console.log(`📍 URL: http://localhost:${PORT}`);
-  console.log(`🔐 API key: ${process.env.ANTHROPIC_API_KEY ? 'Loaded ✓' : 'Missing ✗'}`);
-  console.log(`🏥 Health check: http://localhost:${PORT}/api/health\n`);
-});
+// For Vercel serverless
+export default app;
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`\n✅ Backend Server Running!`);
+    console.log(`📍 URL: http://localhost:${PORT}`);
+    console.log(`🔐 API key: ${process.env.ANTHROPIC_API_KEY ? 'Loaded ✓' : 'Missing ✗'}`);
+    console.log(`🏥 Health check: http://localhost:${PORT}/api/health\n`);
+  });
+}
