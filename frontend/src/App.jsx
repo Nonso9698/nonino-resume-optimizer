@@ -82,7 +82,6 @@ export default function NoninoResumeOptimizer() {
 
   const API_URL = '/api';
 
-  // Load scan history from localStorage on mount
   useEffect(() => {
     const savedHistory = localStorage.getItem('noninoScanHistory');
     if (savedHistory) {
@@ -90,7 +89,6 @@ export default function NoninoResumeOptimizer() {
     }
   }, []);
 
-  // Save scan to history (keep last 10 only)
   const saveScanToHistory = (roleTitle, companyName) => {
     const newScan = {
       id: Date.now(),
@@ -100,7 +98,7 @@ export default function NoninoResumeOptimizer() {
       time: new Date().toLocaleTimeString()
     };
     
-    const updatedHistory = [newScan, ...scanHistory].slice(0, 10); // Keep last 10 scans only
+    const updatedHistory = [newScan, ...scanHistory].slice(0, 10);
     setScanHistory(updatedHistory);
     localStorage.setItem('noninoScanHistory', JSON.stringify(updatedHistory));
   };
@@ -166,7 +164,6 @@ export default function NoninoResumeOptimizer() {
         feedback: result.data.feedback
       });
 
-      // Save to scan history
       saveScanToHistory(formData.roleTitle, formData.companyName);
     } catch (err) {
       setError(err.message || 'Failed to generate content. Please try again.');
@@ -183,7 +180,6 @@ export default function NoninoResumeOptimizer() {
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
       
-      // Empty line
       if (trimmedLine === '') {
         paragraphs.push(new Paragraph({ 
           text: "",
@@ -192,14 +188,13 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // First line (Name) - Centered, 16pt, Bold
       if (isFirstLine && trimmedLine.length > 0) {
         isFirstLine = false;
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: trimmedLine,
             bold: true,
-            size: 32, // 16pt = 32 half-points
+            size: 32,
             font: "Calibri"
           })],
           alignment: AlignmentType.CENTER,
@@ -208,12 +203,11 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Contact info line (second line) - Centered, 11pt
       if (index === 1) {
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: trimmedLine,
-            size: 22, // 11pt = 22 half-points
+            size: 22,
             font: "Calibri"
           })],
           alignment: AlignmentType.CENTER,
@@ -222,7 +216,6 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Section Headers (ALL CAPS lines) - Bold, 13pt, Navy
       if (trimmedLine === trimmedLine.toUpperCase() && 
           trimmedLine.length < 50 && 
           !trimmedLine.startsWith('-') &&
@@ -231,22 +224,21 @@ export default function NoninoResumeOptimizer() {
           children: [new TextRun({ 
             text: trimmedLine,
             bold: true,
-            size: 26, // 13pt = 26 half-points
+            size: 26,
             font: "Calibri",
-            color: "1E3A8A" // Navy blue
+            color: "1E3A8A"
           })],
           spacing: { before: 200, after: 100 }
         }));
         return;
       }
       
-      // Job title lines (contain company name with |)
       if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: trimmedLine,
             bold: true,
-            size: 22, // 11pt
+            size: 22,
             font: "Calibri"
           })],
           spacing: { before: 150, after: 50 }
@@ -254,13 +246,12 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Bullet points
       if (trimmedLine.startsWith('-')) {
         const bulletText = trimmedLine.substring(1).trim();
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: bulletText,
-            size: 22, // 11pt
+            size: 22,
             font: "Calibri"
           })],
           bullet: {
@@ -271,11 +262,10 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Regular text
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
-          size: 22, // 11pt
+          size: 22,
           font: "Calibri"
         })],
         spacing: { after: 100 }
@@ -299,53 +289,52 @@ export default function NoninoResumeOptimizer() {
 
       console.log('Creating document...');
       const doc = new Document({
-      sections: [{
-        properties: {
-          page: {
-            margin: {
-              top: 1080,    // 0.75" in twips (1440 twips = 1 inch)
-              bottom: 1080, // 0.75"
-              left: 1008,   // 0.7"
-              right: 1008   // 0.7"
+        sections: [{
+          properties: {
+            page: {
+              margin: {
+                top: 1080,
+                bottom: 1080,
+                left: 1008,
+                right: 1008
+              }
             }
-          }
-        },
-        children: contentParagraphs,
-      }],
-      styles: {
-        default: {
-          document: {
-            run: {
-              font: "Calibri",
-              size: 22 // 11pt default
-            },
-            paragraph: {
-              spacing: {
-                line: 276, // 1.15 line spacing (276 = 1.15 * 240)
-                after: 100
+          },
+          children: contentParagraphs,
+        }],
+        styles: {
+          default: {
+            document: {
+              run: {
+                font: "Calibri",
+                size: 22
+              },
+              paragraph: {
+                spacing: {
+                  line: 276,
+                  after: 100
+                }
               }
             }
           }
         }
-      }
-    });
+      });
 
-    console.log('Packing document...');
-    const blob = await Packer.toBlob(doc);
-    console.log('Blob created, size:', blob.size);
-    
-    console.log('Saving file...');
-    saveAs(blob, `${fileName}.docx`);
-    console.log('File save triggered!');
-  } catch (error) {
-    console.error('Error creating Word document:', error);
-    alert('Error creating Word document: ' + error.message);
-  }
-};
+      console.log('Packing document...');
+      const blob = await Packer.toBlob(doc);
+      console.log('Blob created, size:', blob.size);
+      
+      console.log('Saving file...');
+      saveAs(blob, `${fileName}.docx`);
+      console.log('File save triggered!');
+    } catch (error) {
+      console.error('Error creating Word document:', error);
+      alert('Error creating Word document: ' + error.message);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-950">
-      {/* Header */}
       <div className="bg-blue-950/50 backdrop-blur-sm border-b border-blue-700/30 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -362,7 +351,6 @@ export default function NoninoResumeOptimizer() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Scan History Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-5 sticky top-24">
               <div className="flex items-center gap-2 mb-4">
@@ -398,7 +386,6 @@ export default function NoninoResumeOptimizer() {
             </div>
           </div>
 
-          {/* Main Content */}
           <div className="lg:col-span-3">
             {error && (
               <div className="mb-6 bg-red-50 border-2 border-red-300 rounded-2xl p-4 flex items-start shadow-lg">
@@ -611,7 +598,6 @@ export default function NoninoResumeOptimizer() {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="bg-blue-950/50 backdrop-blur-sm border-t border-blue-700/30 mt-12">
         <div className="max-w-7xl mx-auto px-4 py-6 text-center">
           <p className="text-blue-300 text-sm">
