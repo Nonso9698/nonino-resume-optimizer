@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Eye } from 'lucide-react';
+import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Download, Eye } from 'lucide-react'; // Added Download icon
 import { Document, Paragraph, TextRun, Packer } from 'docx';
 import { saveAs } from 'file-saver';
 
+// --- (Keep DEFAULT_RESUME constant as it is in your original code) ---
 const DEFAULT_RESUME = `KING N. IHE., CISA
 Charlotte, NC | 704-387-0104 | Nonso.King.Ihe@gmail.com | linkedin.com/in/king-n-i-ab994133b
 
@@ -65,6 +66,75 @@ KEY ACHIEVEMENTS
 
 TECHNICAL SKILLS
 ServiceNow GRC (Administration & Workflow Design) • RSA Archer • AuditBoard • Splunk (Dashboard Creation & Analytics) • Nessus Professional • Qualys VMDR • AWS Security Services (IAM, CloudTrail, GuardDuty) • Microsoft Azure Security Center • Advanced Excel (Pivot Tables, Macros, Statistical Analysis) • SQL Database Queries • Power BI`;
+// --- (End DEFAULT_RESUME constant) ---
+
+
+// Helper function to convert plain text to docx format
+const createDocx = (plainText) => {
+  // Split text by newlines to get individual paragraphs/lines
+  const lines = plainText.split('\n');
+
+  // Map each line to a docx Paragraph.
+  // We apply some heuristic to detect bullet points or bold titles.
+  const documentChildren = lines.map(line => {
+    line = line.trim();
+    if (!line) return new Paragraph({ text: '' }); // Empty paragraph for blank lines
+
+    let textRuns = [];
+    let bullet = false;
+
+    if (line.startsWith('- ') || line.startsWith('• ')) {
+        bullet = true;
+        line = line.substring(2).trim(); // Remove bullet prefix
+    }
+
+    // Simple heuristic for bold: all caps and colon or 'COMPETENCIES' or 'EXPERIENCE'
+    const isHeading = line.toUpperCase() === line || line.endsWith(':') || line.includes('COMPETENCIES') || line.includes('EXPERIENCE') || line.includes('ACHIEVEMENTS') || line.includes('CERTIFICATIONS') || line.includes('EDUCATION') || line.includes('SKILLS');
+
+    textRuns.push(new TextRun({
+        text: line,
+        bold: isHeading,
+        font: "Arial",
+        size: 22, // 11pt
+    }));
+
+    return new Paragraph({
+        children: textRuns,
+        spacing: { after: 100 }, // Small spacing after each line (in twips)
+        bullet: bullet ? { level: 0 } : undefined,
+    });
+  });
+
+  // Create the document
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: documentChildren,
+    }],
+  });
+
+  return doc;
+};
+
+
+const downloadDocx = async (content, documentType, companyName) => {
+    if (!content) return;
+    try {
+        const doc = createDocx(content);
+        const buffer = await Packer.toBuffer(doc);
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+        
+        const firstLetter = companyName.trim().charAt(0).toUpperCase();
+        const fileName = documentType === 'resume'  
+            ? `King_${firstLetter}_OptimizedResume.docx`
+            : `King_${firstLetter}_CoverLetter.docx`;
+
+        saveAs(blob, fileName);
+    } catch (error) {
+        console.error("Failed to generate or save DOCX:", error);
+        alert('Failed to generate DOCX file. See console for details.');
+    }
+};
 
 export default function NoninoResumeOptimizer() {
   const [formData, setFormData] = useState({
@@ -141,6 +211,7 @@ export default function NoninoResumeOptimizer() {
     setError(null);
 
     try {
+      // NOTE: This assumes you have a backend API at '/api/generate'
       const response = await fetch(`${API_URL}/generate`, {
         method: 'POST',
         headers: {
@@ -161,7 +232,8 @@ export default function NoninoResumeOptimizer() {
       const result = await response.json();
 
       setResults({
-        optimizedResume: result.data.optimizedResume,
+        // Assuming the backend returns plain text
+        optimizedResume: result.data.optimizedResume, 
         coverLetter: result.data.coverLetter,
         feedback: result.data.feedback
       });
@@ -175,6 +247,7 @@ export default function NoninoResumeOptimizer() {
     }
   };
 
+  // The original previewDocument is kept for viewing purposes
   const previewDocument = (content, documentType) => {
     const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
     const fileName = documentType === 'resume' 
@@ -306,8 +379,8 @@ export default function NoninoResumeOptimizer() {
       <body>
         <div class="container">
           <div class="top-toolbar">
-            <h1>📄 ${fileName}</h1>
-            <button onclick="window.print()">💾 Save / Print</button>
+            <h1>📄 ${fileName} - Preview (Save as PDF)</h1>
+            <button onclick="window.print()">💾 Save / Print (PDF)</button>
           </div>
           <div class="format-toolbar">
             <button class="format-btn" onclick="document.execCommand('bold', false, null)" title="Bold (Ctrl+B)"><b>B</b></button>
@@ -547,13 +620,24 @@ export default function NoninoResumeOptimizer() {
                       <FileText className="w-6 h-6 text-blue-600 mr-2" />
                       Optimized Resume
                     </h2>
-                    <button
-                      onClick={() => previewDocument(results.optimizedResume, 'resume')}
-                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      Open Document
-                    </button>
+                    <div className="flex space-x-2">
+                        {/* New Download DOCX Button */}
+                        <button
+                          onClick={() => downloadDocx(results.optimizedResume, 'resume', formData.companyName)}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download DOCX
+                        </button>
+                        {/* Keep Preview Button */}
+                        <button
+                            onClick={() => previewDocument(results.optimizedResume, 'resume')}
+                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
+                        >
+                            <Eye className="w-4 h-4 mr-2" />
+                            Preview
+                        </button>
+                    </div>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 max-h-96 overflow-y-auto">
                     <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans">
@@ -568,13 +652,24 @@ export default function NoninoResumeOptimizer() {
                       <FileText className="w-6 h-6 text-blue-600 mr-2" />
                       Customized Cover Letter
                     </h2>
-                    <button
-                      onClick={() => previewDocument(results.coverLetter, 'coverletter')}
-                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      Open Document
-                    </button>
+                    <div className="flex space-x-2">
+                        {/* New Download DOCX Button */}
+                        <button
+                          onClick={() => downloadDocx(results.coverLetter, 'coverletter', formData.companyName)}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download DOCX
+                        </button>
+                        {/* Keep Preview Button */}
+                        <button
+                            onClick={() => previewDocument(results.coverLetter, 'coverletter')}
+                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
+                        >
+                            <Eye className="w-4 h-4 mr-2" />
+                            Preview
+                        </button>
+                    </div>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 max-h-96 overflow-y-auto">
                     <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans">
