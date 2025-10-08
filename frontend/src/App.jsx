@@ -177,106 +177,153 @@ export default function NoninoResumeOptimizer() {
   };
 
   const convertTextToParagraphs = (text) => {
-    const lines = text.split('\n');
-    const paragraphs = [];
-    let isFirstLine = true;
+  const lines = text.split('\n');
+  const paragraphs = [];
+  let isFirstLine = true;
+  let previousLineWasEducationHeader = false;
+  
+  lines.forEach((line, index) => {
+    const trimmedLine = line.trim();
     
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      
-      if (trimmedLine === '') {
-        paragraphs.push(new Paragraph({ 
-          text: "",
-          spacing: { after: 100 }
-        }));
-        return;
-      }
-      
-      if (isFirstLine && trimmedLine.length > 0) {
-        isFirstLine = false;
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: trimmedLine,
-            bold: true,
-            size: 32,
-            font: "Calibri"
-          })],
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 200 }
-        }));
-        return;
-      }
-      
-      if (index === 1) {
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: trimmedLine,
-            size: 22,
-            font: "Calibri"
-          })],
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 200 }
-        }));
-        return;
-      }
-      
-      if (trimmedLine === trimmedLine.toUpperCase() && 
-          trimmedLine.length < 50 && 
-          !trimmedLine.startsWith('-') &&
-          !trimmedLine.includes('|')) {
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: trimmedLine,
-            bold: true,
-            size: 26,
-            font: "Calibri",
-            color: "1E3A8A"
-          })],
-          spacing: { before: 200, after: 100 }
-        }));
-        return;
-      }
-      
-      if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: trimmedLine,
-            bold: true,
-            size: 22,
-            font: "Calibri"
-          })],
-          spacing: { before: 150, after: 50 }
-        }));
-        return;
-      }
-      
-      if (trimmedLine.startsWith('-')) {
-        const bulletText = trimmedLine.substring(1).trim();
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: bulletText,
-            size: 22,
-            font: "Calibri"
-          })],
-          bullet: {
-            level: 0
-          },
-          spacing: { after: 100 }
-        }));
-        return;
-      }
-      
+    // Empty line - reduced spacing
+    if (trimmedLine === '') {
+      paragraphs.push(new Paragraph({ 
+        text: "",
+        spacing: { after: 50 }  // Reduced from 100
+      }));
+      return;
+    }
+    
+    // First line (Name) - Centered, 16pt, Bold
+    if (isFirstLine && trimmedLine.length > 0) {
+      isFirstLine = false;
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          bold: true,
+          size: 32,
+          font: "Calibri"
+        })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 150 }  // Reduced from 200
+      }));
+      return;
+    }
+    
+    // Contact info line (second line) - Centered, 11pt
+    if (index === 1) {
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
           size: 22,
           font: "Calibri"
         })],
-        spacing: { after: 100 }
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 150 }  // Reduced from 200
       }));
-    });
+      return;
+    }
     
-    return paragraphs;
+    // Section Headers (ALL CAPS lines) - Bold, 13pt, Navy
+    if (trimmedLine === trimmedLine.toUpperCase() && 
+        trimmedLine.length < 50 && 
+        !trimmedLine.startsWith('-') &&
+        !trimmedLine.includes('|')) {
+      
+      // Check if this is EDUCATION section
+      previousLineWasEducationHeader = trimmedLine.includes('EDUCATION');
+      
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          bold: true,
+          size: 26,
+          font: "Calibri",
+          color: "1E3A8A"
+        })],
+        spacing: { before: 150, after: 80 }  // Reduced spacing
+      }));
+      return;
+    }
+    
+    // School names (after EDUCATION header) - Shaded background
+    if (previousLineWasEducationHeader && !trimmedLine.startsWith('-')) {
+      previousLineWasEducationHeader = false;
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          bold: true,
+          size: 22,
+          font: "Calibri"
+        })],
+        shading: {
+          fill: "E5E7EB"  // Light gray background
+        },
+        spacing: { before: 100, after: 30 }
+      }));
+      return;
+    }
+    
+    // Degree lines (under school - contains "Bachelor", "Master", etc)
+    if (trimmedLine.match(/bachelor|master|phd|associate|diploma/i) && !trimmedLine.includes('|')) {
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          size: 20,  // Smaller than school name
+          font: "Calibri",
+          italics: true
+        })],
+        spacing: { after: 80 }
+      }));
+      return;
+    }
+    
+    // Job title lines (contain company name with |) - SHADED
+    if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          bold: true,
+          size: 22,
+          font: "Calibri"
+        })],
+        shading: {
+          fill: "DBEAFE"  // Light blue background (shaded)
+        },
+        spacing: { before: 120, after: 40 }  // Reduced spacing
+      }));
+      return;
+    }
+    
+    // Bullet points
+    if (trimmedLine.startsWith('-')) {
+      const bulletText = trimmedLine.substring(1).trim();
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: bulletText,
+          size: 22,
+          font: "Calibri"
+        })],
+        bullet: {
+          level: 0
+        },
+        spacing: { after: 60 }  // Reduced from 100
+      }));
+      return;
+    }
+    
+    // Regular text
+    paragraphs.push(new Paragraph({
+      children: [new TextRun({ 
+        text: trimmedLine,
+        size: 22,
+        font: "Calibri"
+      })],
+      spacing: { after: 60 }  // Reduced from 100
+    }));
+  });
+  
+  return paragraphs;
   };
 
   const openInWord = async (content, documentType) => {
