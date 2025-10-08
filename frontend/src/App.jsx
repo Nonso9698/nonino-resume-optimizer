@@ -180,69 +180,124 @@ export default function NoninoResumeOptimizer() {
   const lines = text.split('\n');
   const paragraphs = [];
   let isFirstLine = true;
+  let inEducationSection = false;
+  let nextLineIsDegree = false;
   
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
     
-    // Empty line
+    // Empty line - very minimal spacing
     if (trimmedLine === '') {
       paragraphs.push(new Paragraph({ 
         text: "",
-        spacing: { after: 100 }
+        spacing: { after: 20 }
       }));
       return;
     }
     
-    // First line (Name) - Centered, 16pt, Bold
+    // First line (Name) - Centered, 14pt, Bold
     if (isFirstLine && trimmedLine.length > 0) {
       isFirstLine = false;
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
           bold: true,
-          size: 32,
+          size: 28,
           font: "Calibri"
         })],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 200 }
+        spacing: { after: 80 }
       }));
       return;
     }
     
-    // Contact info line (second line) - Centered, 11pt
+    // Contact info line (second line) - Centered, 10pt
     if (index === 1) {
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
-          size: 22,
+          size: 20,
           font: "Calibri"
         })],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 200 }
+        spacing: { after: 80 }
       }));
       return;
     }
     
-    // Section Headers (ALL CAPS lines) - Bold, 13pt, Navy
+    // Section Headers (ALL CAPS lines) - Bold, 12pt, Navy
     if (trimmedLine === trimmedLine.toUpperCase() && 
         trimmedLine.length < 50 && 
         !trimmedLine.startsWith('-') &&
         !trimmedLine.includes('|')) {
+      
+      inEducationSection = trimmedLine.includes('EDUCATION');
+      
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
           bold: true,
-          size: 26,
+          size: 24,
           font: "Calibri",
           color: "1E3A8A"
         })],
-        spacing: { before: 200, after: 100 }
+        spacing: { before: 80, after: 40 }
       }));
       return;
     }
     
-    // Job title lines (contain company name with |)
+    // In Education section - detect school vs degree
+    if (inEducationSection && !trimmedLine.startsWith('-')) {
+      if (trimmedLine.match(/^(master|bachelor|associate|phd|diploma|doctor)/i)) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            size: 18,
+            font: "Calibri"
+          })],
+          spacing: { after: 30 }
+        }));
+        nextLineIsDegree = false;
+        return;
+      }
+      
+      if (!nextLineIsDegree && !trimmedLine.includes('|')) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            bold: true,
+            size: 20,
+            font: "Calibri"
+          })],
+          spacing: { before: 50, after: 15 }
+        }));
+        nextLineIsDegree = true;
+        return;
+      }
+    }
+    
+    // Company line (contains |) - Smaller, bold
     if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
+      inEducationSection = false;
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          bold: true,
+          size: 18,
+          font: "Calibri"
+        })],
+        spacing: { after: 30 }
+      }));
+      return;
+    }
+    
+    // Job Role Title (line before company)
+    if (!inEducationSection && 
+        !trimmedLine.startsWith('-') && 
+        trimmedLine !== trimmedLine.toUpperCase() &&
+        !trimmedLine.includes('|') &&
+        index > 2 &&
+        lines[index + 1] && lines[index + 1].includes('|')) {
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
@@ -250,98 +305,99 @@ export default function NoninoResumeOptimizer() {
           size: 22,
           font: "Calibri"
         })],
-        spacing: { before: 150, after: 50 }
+        spacing: { before: 60, after: 15 }
       }));
       return;
     }
     
-    // Bullet points
+    // Bullet points - 10pt
     if (trimmedLine.startsWith('-')) {
+      inEducationSection = false;
+      nextLineIsDegree = false;
       const bulletText = trimmedLine.substring(1).trim();
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: bulletText,
-          size: 22,
+          size: 20,
           font: "Calibri"
         })],
         bullet: {
           level: 0
         },
-        spacing: { after: 100 }
+        spacing: { after: 30 }
       }));
       return;
     }
     
-    // Regular text
+    // Regular text - 10pt
     paragraphs.push(new Paragraph({
       children: [new TextRun({ 
         text: trimmedLine,
-        size: 22,
+        size: 20,
         font: "Calibri"
       })],
-      spacing: { after: 100 }
+      spacing: { after: 30 }
     }));
   });
   
   return paragraphs;
 };
-
   const openInWord = async (content, documentType) => {
-    try {
-      console.log('Starting Word export...');
-      const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
-      const fileName = documentType === 'resume' 
-        ? `King_${firstLetter}_Resume`
-        : `King_${firstLetter}_CoverLetter`;
+  try {
+    console.log('Starting Word export...');
+    const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
+    const fileName = documentType === 'resume' 
+      ? `King_${firstLetter}_Resume`
+      : `King_${firstLetter}_CoverLetter`;
 
-      console.log('Converting to paragraphs...');
-      const contentParagraphs = convertTextToParagraphs(content);
+    console.log('Converting to paragraphs...');
+    const contentParagraphs = convertTextToParagraphs(content);
 
-      console.log('Creating document...');
-      const doc = new Document({
-        sections: [{
-          properties: {
-            page: {
-              margin: {
-                top: 1080,
-                bottom: 1080,
-                left: 1008,
-                right: 1008
-              }
+    console.log('Creating document...');
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: 1080,
+              bottom: 1080,
+              left: 1008,
+              right: 1008
             }
-          },
-          children: contentParagraphs,
-        }],
-        styles: {
-          default: {
-            document: {
-              run: {
-                font: "Calibri",
-                size: 22
-              },
-              paragraph: {
-                spacing: {
-                  line: 276,
-                  after: 100
-                }
+          }
+        },
+        children: contentParagraphs,
+      }],
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Calibri",
+              size: 20
+            },
+            paragraph: {
+              spacing: {
+                line: 240,
+                after: 30
               }
             }
           }
         }
-      });
+      }
+    });
 
-      console.log('Packing document...');
-      const blob = await Packer.toBlob(doc);
-      console.log('Blob created, size:', blob.size);
-      
-      console.log('Saving file...');
-      saveAs(blob, `${fileName}.docx`);
-      console.log('File save triggered!');
-    } catch (error) {
-      console.error('Error creating Word document:', error);
-      alert('Error creating Word document: ' + error.message);
-    }
-  };
+    console.log('Packing document...');
+    const blob = await Packer.toBlob(doc);
+    console.log('Blob created, size:', blob.size);
+    
+    console.log('Saving file...');
+    saveAs(blob, `${fileName}.docx`);
+    console.log('File save triggered!');
+  } catch (error) {
+    console.error('Error creating Word document:', error);
+    alert('Error creating Word document: ' + error.message);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-950">
