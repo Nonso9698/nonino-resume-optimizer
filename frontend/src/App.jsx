@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Download, Eye } from 'lucide-react'; 
-import { Document, Paragraph, TextRun, Packer, HeadingLevel, AlignmentType, Spacing, IParagraphStyleOptions } from 'docx';
+import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Eye } from 'lucide-react';
+import { Document, Paragraph, TextRun, Packer } from 'docx';
 import { saveAs } from 'file-saver';
 
-// --- (Keep DEFAULT_RESUME constant as it is in your original code) ---
 const DEFAULT_RESUME = `KING N. IHE., CISA
 Charlotte, NC | 704-387-0104 | Nonso.King.Ihe@gmail.com | linkedin.com/in/king-n-i-ab994133b
 
@@ -66,227 +65,6 @@ KEY ACHIEVEMENTS
 
 TECHNICAL SKILLS
 ServiceNow GRC (Administration & Workflow Design) • RSA Archer • AuditBoard • Splunk (Dashboard Creation & Analytics) • Nessus Professional • Qualys VMDR • AWS Security Services (IAM, CloudTrail, GuardDuty) • Microsoft Azure Security Center • Advanced Excel (Pivot Tables, Macros, Statistical Analysis) • SQL Database Queries • Power BI`;
-// --- (End DEFAULT_RESUME constant) ---
-
-
-// Helper function to convert plain text to docx format (FIXED and STYLED)
-const createDocx = (plainText) => {
-    // --- STYLED CONFIGURATION ---
-    const BASE_FONT = "Calibri"; // Safe, common font
-    const BODY_SIZE_TWIPS = 11 * 2; // 11pt = 22 twips (docx uses half-points)
-    const HEADER_SIZE_TWIPS = 13 * 2; // 13pt = 26 twips
-    const NAME_SIZE_TWIPS = 16 * 2; // 16pt = 32 twips
-    const ACCENT_COLOR = "1E3A8A"; // Navy color
-
-    // Section Headers to look for
-    const sectionHeaders = [
-        "PROFESSIONAL SUMMARY", "CORE COMPETENCIES", 
-        "PROFESSIONAL EXPERIENCE", "CERTIFICATIONS", 
-        "EDUCATION", "KEY ACHIEVEMENTS", "TECHNICAL SKILLS"
-    ];
-
-    // Style for the main name/contact line
-    const nameParagraphOptions = {
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 100 }, // Minimal space after contact block
-    };
-
-    // Style for major section headings (H2-level, ALL CAPS, Bold, Navy)
-    const headerParagraphOptions = {
-        heading: HeadingLevel.HEADING_2,
-        // Default spacing for Heading2 in docx is often too large, so we define it:
-        spacing: { before: 200, after: 150 }, 
-        // We set the run properties (font/color) directly on the TextRun below
-    };
-    
-    // Style for normal body text
-    const bodyParagraphOptions = {
-        spacing: { 
-            after: 100, // Minimal space between lines
-            line: 276, // 1.15 line spacing (Single space is 240 twips, 1.15 * 240 ≈ 276)
-        }, 
-        alignment: AlignmentType.LEFT
-    };
-
-    // --- PARSING LOGIC ---
-    const lines = plainText.split('\n');
-    let documentChildren = [];
-    let isFirstLine = true;
-    let isSecondLine = true; // For the contact block line
-
-    lines.forEach(line => {
-        line = line.trim();
-
-        if (!line) {
-            // Add a clean paragraph break
-            if (documentChildren.length > 0 && !(documentChildren[documentChildren.length - 1].options.text === '')) {
-                documentChildren.push(new Paragraph({ text: '' }));
-            }
-            return;
-        }
-
-        // 1. Name Line (first line)
-        if (isFirstLine) {
-            documentChildren.push(
-                new Paragraph({
-                    ...nameParagraphOptions,
-                    children: [
-                        new TextRun({ 
-                            text: line, 
-                            font: BASE_FONT, 
-                            size: NAME_SIZE_TWIPS, // 16pt
-                            bold: true,
-                        }),
-                    ],
-                })
-            );
-            isFirstLine = false;
-            return;
-        }
-
-        // 2. Contact Line (second line)
-        if (isSecondLine) {
-            documentChildren.push(
-                new Paragraph({
-                    ...nameParagraphOptions,
-                    alignment: AlignmentType.CENTER,
-                    children: [
-                        new TextRun({ 
-                            text: line, 
-                            font: BASE_FONT, 
-                            size: BODY_SIZE_TWIPS, // 11pt
-                        }),
-                    ],
-                })
-            );
-            isSecondLine = false;
-            return;
-        }
-
-        // 3. Section Headers
-        if (sectionHeaders.includes(line.toUpperCase())) {
-            documentChildren.push(
-                new Paragraph({
-                    ...headerParagraphOptions,
-                    children: [
-                        new TextRun({
-                            text: line.toUpperCase(),
-                            font: BASE_FONT,
-                            size: HEADER_SIZE_TWIPS, // 13pt
-                            bold: true,
-                            color: ACCENT_COLOR, // Navy
-                        }),
-                    ],
-                    border: {
-                        bottom: {
-                            color: ACCENT_COLOR,
-                            space: 5,
-                            value: "single",
-                            size: 6, // line thickness
-                        },
-                    },
-                })
-            );
-            return;
-        }
-
-        // 4. Bullet Points
-        const isBullet = line.startsWith('- ') || line.startsWith('• ');
-        if (isBullet) {
-            const textContent = line.substring(line.indexOf(' ') + 1).trim();
-            documentChildren.push(
-                new Paragraph({
-                    children: [
-                        new TextRun({ 
-                            text: textContent, 
-                            font: BASE_FONT, 
-                            size: BODY_SIZE_TWIPS 
-                        }),
-                    ],
-                    bullet: { level: 0 },
-                    // Use a slightly larger left indent for list items
-                    indent: { left: 400 }, 
-                    spacing: { after: 50 }, 
-                })
-            );
-        } else {
-            // 5. Standard Text (Job titles, descriptive text, etc.)
-            // Bold heuristic: Job Title line (contains | or - Present)
-            const isBold = line.includes(' | ') || line.includes('– Present') || line.endsWith(':');
-
-            documentChildren.push(
-                new Paragraph({
-                    ...bodyParagraphOptions,
-                    children: [
-                        new TextRun({ 
-                            text: line, 
-                            bold: isBold, 
-                            font: BASE_FONT, 
-                            size: BODY_SIZE_TWIPS 
-                        }),
-                    ],
-                })
-            );
-        }
-    });
-
-    // Create the document with specified margins
-    const doc = new Document({
-        styles: {
-            paragraphStyles: [
-                // Set default Normal style (Fallback for all non-styled text)
-                {
-                    id: "Normal",
-                    name: "Normal",
-                    run: {
-                        font: BASE_FONT,
-                        size: BODY_SIZE_TWIPS,
-                    },
-                    paragraph: {
-                        spacing: { line: 276 },
-                    }
-                }
-            ],
-        },
-        sections: [{
-            properties: {
-                page: {
-                    margin: {
-                        // Converted from inches to Twips (1 inch = 1440 twips)
-                        top: 0.75 * 1440,    // 0.75"
-                        right: 0.70 * 1440,   // 0.7"
-                        bottom: 0.75 * 1440, // 0.75"
-                        left: 0.70 * 1440,   // 0.7"
-                    }
-                }
-            },
-            children: documentChildren,
-        }],
-    });
-
-    return doc;
-};
-
-
-const downloadDocx = async (content, documentType, companyName) => {
-    if (!content) return;
-    try {
-        const doc = createDocx(content);
-        const buffer = await Packer.toBuffer(doc); 
-        
-        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-        
-        const firstLetter = companyName.trim().charAt(0).toUpperCase();
-        const fileName = documentType === 'resume'  
-            ? `King_${firstLetter}_OptimizedResume.docx`
-            : `King_${firstLetter}_CoverLetter.docx`;
-
-        saveAs(blob, fileName);
-    } catch (error) {
-        console.error("CRITICAL DOCX GENERATION ERROR:", error); 
-        alert(`Failed to generate DOCX file. Please check the console for details on the structure error: ${error.message}`);
-    }
-};
 
 export default function NoninoResumeOptimizer() {
   const [formData, setFormData] = useState({
@@ -363,7 +141,6 @@ export default function NoninoResumeOptimizer() {
     setError(null);
 
     try {
-      // NOTE: This assumes you have a backend API at '/api/generate'
       const response = await fetch(`${API_URL}/generate`, {
         method: 'POST',
         headers: {
@@ -384,8 +161,7 @@ export default function NoninoResumeOptimizer() {
       const result = await response.json();
 
       setResults({
-        // Assuming the backend returns plain text
-        optimizedResume: result.data.optimizedResume, 
+        optimizedResume: result.data.optimizedResume,
         coverLetter: result.data.coverLetter,
         feedback: result.data.feedback
       });
@@ -399,169 +175,166 @@ export default function NoninoResumeOptimizer() {
     }
   };
 
-  // The original previewDocument is kept for viewing purposes
-  const previewDocument = (content, documentType) => {
+  const convertTextToParagraphs = (text) => {
+    const lines = text.split('\n');
+    const paragraphs = [];
+    let isFirstLine = true;
+    
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+      
+      // Empty line
+      if (trimmedLine === '') {
+        paragraphs.push(new Paragraph({ 
+          text: "",
+          spacing: { after: 100 }
+        }));
+        return;
+      }
+      
+      // First line (Name) - Centered, 16pt, Bold
+      if (isFirstLine && trimmedLine.length > 0) {
+        isFirstLine = false;
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            bold: true,
+            size: 32, // 16pt = 32 half-points
+            font: "Calibri"
+          })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 }
+        }));
+        return;
+      }
+      
+      // Contact info line (second line) - Centered, 11pt
+      if (index === 1) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            size: 22, // 11pt = 22 half-points
+            font: "Calibri"
+          })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 }
+        }));
+        return;
+      }
+      
+      // Section Headers (ALL CAPS lines) - Bold, 13pt, Navy
+      if (trimmedLine === trimmedLine.toUpperCase() && 
+          trimmedLine.length < 50 && 
+          !trimmedLine.startsWith('-') &&
+          !trimmedLine.includes('|')) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            bold: true,
+            size: 26, // 13pt = 26 half-points
+            font: "Calibri",
+            color: "1E3A8A" // Navy blue
+          })],
+          spacing: { before: 200, after: 100 },
+          border: {
+            bottom: {
+              color: "1E3A8A",
+              space: 1,
+              style: "single",
+              size: 6
+            }
+          }
+        }));
+        return;
+      }
+      
+      // Job title lines (contain company name with |)
+      if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            bold: true,
+            size: 22, // 11pt
+            font: "Calibri"
+          })],
+          spacing: { before: 150, after: 50 }
+        }));
+        return;
+      }
+      
+      // Bullet points
+      if (trimmedLine.startsWith('-')) {
+        const bulletText = trimmedLine.substring(1).trim();
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: bulletText,
+            size: 22, // 11pt
+            font: "Calibri"
+          })],
+          bullet: {
+            level: 0
+          },
+          spacing: { after: 100 }
+        }));
+        return;
+      }
+      
+      // Regular text
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          size: 22, // 11pt
+          font: "Calibri"
+        })],
+        spacing: { after: 100 }
+      }));
+    });
+    
+    return paragraphs;
+  };
+
+  const openInWord = async (content, documentType) => {
     const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
     const fileName = documentType === 'resume' 
       ? `King_${firstLetter}_Resume`
       : `King_${firstLetter}_CoverLetter`;
-    
-    const previewWindow = window.open('', '_blank');
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${fileName} - Preview (Save as PDF)</title>
-        <meta charset="UTF-8">
-        <style>
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
-          }
-          .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
-          }
-          .top-toolbar {
-            background: #2563eb;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-          .top-toolbar h1 {
-            font-size: 18px;
-            font-weight: 600;
-          }
-          .top-toolbar button {
-            background: white;
-            color: #2563eb;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s;
-          }
-          .top-toolbar button:hover {
-            background: #f0f0f0;
-            transform: translateY(-1px);
-          }
-          .format-toolbar {
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 10px 20px;
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-          }
-          .format-btn {
-            background: white;
-            border: 1px solid #cbd5e1;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s;
-            color: #334155;
-          }
-          .format-btn:hover {
-            background: #e2e8f0;
-            border-color: #94a3b8;
-          }
-          .format-btn:active {
-            background: #cbd5e1;
-          }
-          .editor {
-            padding: 40px;
-            min-height: 600px;
-          }
-          #content {
-            width: 100%;
-            min-height: 500px;
-            border: none;
-            outline: none;
-            font-family: Arial, sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            color: #333;
-          }
-          .instructions {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            color: #1e40af;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-            font-size: 13px;
-          }
-          @media print {
-            body { 
-              background: white;
-              padding: 0;
-            }
-            .top-toolbar, .format-toolbar, .instructions { 
-              display: none; 
-            }
-            .container {
-              box-shadow: none;
-              max-width: 100%;
-            }
-            .editor {
-              padding: 20mm;
+
+    const contentParagraphs = convertTextToParagraphs(content);
+
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: 1080,    // 0.75" in twips (1440 twips = 1 inch)
+              bottom: 1080, // 0.75"
+              left: 1008,   // 0.7"
+              right: 1008   // 0.7"
             }
           }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="top-toolbar">
-            <h1>📄 ${fileName} - Preview (Save as PDF)</h1>
-            <button onclick="window.print()">💾 Save / Print (PDF)</button>
-          </div>
-          <div class="format-toolbar">
-            <button class="format-btn" onclick="document.execCommand('bold', false, null)" title="Bold (Ctrl+B)"><b>B</b></button>
-            <button class="format-btn" onclick="document.execCommand('italic', false, null)" title="Italic (Ctrl+I)"><i>I</i></button>
-            <button class="format-btn" onclick="document.execCommand('underline', false, null)" title="Underline (Ctrl+U)"><u>U</u></button>
-            <button class="format-btn" onclick="document.execCommand('strikeThrough', false, null)" title="Strikethrough"><s>S</s></button>
-            <span style="border-left: 1px solid #cbd5e1; margin: 0 5px;"></span>
-            <button class="format-btn" onclick="document.execCommand('justifyLeft', false, null)" title="Align Left">⬅ Left</button>
-            <button class="format-btn" onclick="document.execCommand('justifyCenter', false, null)" title="Align Center">↔ Center</button>
-            <button class="format-btn" onclick="document.execCommand('justifyRight', false, null)" title="Align Right">➡ Right</button>
-            <span style="border-left: 1px solid #cbd5e1; margin: 0 5px;"></span>
-            <button class="format-btn" onclick="document.execCommand('insertUnorderedList', false, null)" title="Bullet List">• List</button>
-            <button class="format-btn" onclick="document.execCommand('insertOrderedList', false, null)" title="Numbered List">1. List</button>
-            <span style="border-left: 1px solid #cbd5e1; margin: 0 5px;"></span>
-            <button class="format-btn" onclick="document.execCommand('undo', false, null)" title="Undo (Ctrl+Z)">↶ Undo</button>
-            <button class="format-btn" onclick="document.execCommand('redo', false, null)" title="Redo (Ctrl+Y)">↷ Redo</button>
-          </div>
-          <div class="editor">
-            <div class="instructions">
-              ✏️ <strong>Edit freely!</strong> Use the formatting toolbar above or keyboard shortcuts (Ctrl+B for bold, Ctrl+I for italic, Ctrl+U for underline). Click "Save / Print" when ready to save as PDF.
-            </div>
-            <div id="content" contenteditable="true">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-    previewWindow.document.write(htmlContent);
-    previewWindow.document.close();
+        },
+        children: contentParagraphs,
+      }],
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Calibri",
+              size: 22 // 11pt default
+            },
+            paragraph: {
+              spacing: {
+                line: 276, // 1.15 line spacing (276 = 1.15 * 240)
+                after: 100
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `${fileName}.docx`);
   };
 
   return (
@@ -772,24 +545,13 @@ export default function NoninoResumeOptimizer() {
                       <FileText className="w-6 h-6 text-blue-600 mr-2" />
                       Optimized Resume
                     </h2>
-                    <div className="flex space-x-2">
-                        {/* New Download DOCX Button */}
-                        <button
-                          onClick={() => downloadDocx(results.optimizedResume, 'resume', formData.companyName)}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download DOCX
-                        </button>
-                        {/* Keep Preview Button */}
-                        <button
-                            onClick={() => previewDocument(results.optimizedResume, 'resume')}
-                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                        >
-                            <Eye className="w-4 h-4 mr-2" />
-                            Preview
-                        </button>
-                    </div>
+                    <button
+                      onClick={() => openInWord(results.optimizedResume, 'resume')}
+                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Open in Word
+                    </button>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 max-h-96 overflow-y-auto">
                     <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans">
@@ -804,24 +566,13 @@ export default function NoninoResumeOptimizer() {
                       <FileText className="w-6 h-6 text-blue-600 mr-2" />
                       Customized Cover Letter
                     </h2>
-                    <div className="flex space-x-2">
-                        {/* New Download DOCX Button */}
-                        <button
-                          onClick={() => downloadDocx(results.coverLetter, 'coverletter', formData.companyName)}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download DOCX
-                        </button>
-                        {/* Keep Preview Button */}
-                        <button
-                            onClick={() => previewDocument(results.coverLetter, 'coverletter')}
-                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                        >
-                            <Eye className="w-4 h-4 mr-2" />
-                            Preview
-                        </button>
-                    </div>
+                    <button
+                      onClick={() => openInWord(results.coverLetter, 'coverletter')}
+                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Open in Word
+                    </button>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 max-h-96 overflow-y-auto">
                     <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans">
