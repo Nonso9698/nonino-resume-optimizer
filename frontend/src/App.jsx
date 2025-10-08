@@ -188,8 +188,7 @@ export default function NoninoResumeOptimizer() {
   };
 
   const downloadAsDocx = async (content, filename) => {
-    const firstLetter = formData.companyName.charAt(0).toUpperCase();
-    const safeRoleName = formData.roleTitle.replace(/[^a-z0-9]/gi, '_');
+    const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
     const baseFilename = filename.includes('resume') 
       ? `King_${firstLetter}`
       : `King_${firstLetter}_CoverLetter`;
@@ -207,13 +206,18 @@ export default function NoninoResumeOptimizer() {
     saveAs(blob, `${baseFilename}.docx`);
   };
 
-  const downloadAsPdf = (content) => {
+  const downloadAsPdf = (content, filename) => {
+    const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
+    const baseFilename = filename.includes('resume') 
+      ? `King_${firstLetter}`
+      : `King_${firstLetter}_CoverLetter`;
+    
     const printWindow = window.open('', '_blank');
     const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Document</title>
+        <title>${baseFilename}</title>
         <style>
           body {
             font-family: Arial, sans-serif;
@@ -464,7 +468,7 @@ export default function NoninoResumeOptimizer() {
                         DOCX
                       </button>
                       <button
-                        onClick={() => downloadAsPdf(results.optimizedResume)}
+                        onClick={() => downloadAsPdf(results.optimizedResume, 'optimized-resume')}
                         className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
                       >
                         <Download className="w-4 h-4 mr-1" />
@@ -494,7 +498,7 @@ export default function NoninoResumeOptimizer() {
                         DOCX
                       </button>
                       <button
-                        onClick={() => downloadAsPdf(results.coverLetter)}
+                        onClick={() => downloadAsPdf(results.coverLetter, 'cover-letter')}
                         className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
                       >
                         <Download className="w-4 h-4 mr-1" />
