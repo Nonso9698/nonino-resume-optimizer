@@ -81,7 +81,7 @@ export default function ResumeOptimizerApp() {
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [isUsingDefaultResume, setIsUsingDefaultResume] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const API_URL = import.meta.env.VITE_API_URL || '/api';
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
