@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Briefcase, Upload, Loader2, Download, CheckCircle, AlertCircle, History, Sparkles, Eye } from 'lucide-react';
-import { Document, Paragraph, TextRun, Packer } from 'docx';
-import { saveAs } from 'file-saver';
+import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Eye } from 'lucide-react';
 
 const DEFAULT_RESUME = `KING N. IHE., CISA
 Charlotte, NC | 704-387-0104 | Nonso.King.Ihe@gmail.com | linkedin.com/in/king-n-i-ab994133b
@@ -90,7 +88,7 @@ export default function NoninoResumeOptimizer() {
     }
   }, []);
 
-  // Save scan to history
+  // Save scan to history (keep last 10 only)
   const saveScanToHistory = (roleTitle, companyName) => {
     const newScan = {
       id: Date.now(),
@@ -100,7 +98,7 @@ export default function NoninoResumeOptimizer() {
       time: new Date().toLocaleTimeString()
     };
     
-    const updatedHistory = [newScan, ...scanHistory].slice(0, 20); // Keep last 20 scans
+    const updatedHistory = [newScan, ...scanHistory].slice(0, 10); // Keep last 10 scans only
     setScanHistory(updatedHistory);
     localStorage.setItem('noninoScanHistory', JSON.stringify(updatedHistory));
   };
@@ -173,18 +171,6 @@ export default function NoninoResumeOptimizer() {
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const convertTextToParagraphs = (text) => {
-    return text.split('\n').map(line => {
-      if (line.trim() === '') {
-        return new Paragraph({ text: "" });
-      }
-      return new Paragraph({
-        children: [new TextRun(line)],
-        spacing: { after: 100 },
-      });
-    });
   };
 
   const previewDocument = (content, documentType) => {
@@ -293,96 +279,20 @@ export default function NoninoResumeOptimizer() {
         <div class="container">
           <div class="toolbar">
             <h1>📄 ${fileName}</h1>
-            <button onclick="downloadAsDocx()">💾 Download DOCX</button>
+            <button onclick="window.print()">💾 Save / Print</button>
           </div>
           <div class="editor">
             <div class="instructions">
-              ✏️ <strong>Edit freely!</strong> You can modify the text below. Click "Download DOCX" when ready to save, or use Ctrl+P to print/save as PDF.
+              ✏️ <strong>Edit freely!</strong> You can modify the text below. Click "Save / Print" to save as PDF (Ctrl+P), or copy the text to save elsewhere.
             </div>
             <div id="content" contenteditable="true">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
           </div>
         </div>
-        <script>
-          function downloadAsDocx() {
-            const content = document.getElementById('content').innerText;
-            const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = '${fileName}.docx';
-            a.click();
-            URL.revokeObjectURL(url);
-          }
-        </script>
       </body>
       </html>
     `;
     previewWindow.document.write(htmlContent);
     previewWindow.document.close();
-  };
-
-  const downloadAsDocx = async (content, filename) => {
-    const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
-    const baseFilename = filename.includes('resume') 
-      ? `King_${firstLetter}`
-      : `King_${firstLetter}_CoverLetter`;
-
-    const contentParagraphs = convertTextToParagraphs(content);
-
-    const doc = new Document({
-      sections: [{
-        properties: {},
-        children: contentParagraphs,
-      }],
-    });
-
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${baseFilename}.docx`);
-  };
-
-  const downloadAsPdf = (content, filename) => {
-    const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
-    const baseFilename = filename.includes('resume') 
-      ? `King_${firstLetter}`
-      : `King_${firstLetter}_CoverLetter`;
-    
-    const printWindow = window.open('', '_blank');
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${baseFilename}</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            line-height: 1.6;
-            color: #333;
-          }
-          pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: Arial, sans-serif;
-            font-size: 11pt;
-          }
-          @media print {
-            body { margin: 20mm; }
-          }
-        </style>
-      </head>
-      <body>
-        <pre>${content}</pre>
-        <script>
-          window.onload = function() {
-            window.print();
-            setTimeout(function() { window.close(); }, 100);
-          }
-        </script>
-      </body>
-      </html>
-    `;
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
   };
 
   return (
@@ -406,15 +316,15 @@ export default function NoninoResumeOptimizer() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Scan History Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sticky top-24">
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-5 sticky top-24">
               <div className="flex items-center gap-2 mb-4">
-                <History className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg font-bold text-gray-800">Scan History</h2>
+                <History className="w-4 h-4 text-blue-600" />
+                <h2 className="text-sm font-bold text-gray-800">Scan History</h2>
               </div>
               
               {scanHistory.length === 0 ? (
-                <div className="text-center py-8 text-gray-400 text-sm">
-                  <History className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                <div className="text-center py-6 text-gray-400 text-xs">
+                  <History className="w-10 h-10 mx-auto mb-2 opacity-30" />
                   <p>No scans yet</p>
                 </div>
               ) : (
@@ -422,15 +332,15 @@ export default function NoninoResumeOptimizer() {
                   {scanHistory.map((scan) => (
                     <div 
                       key={scan.id} 
-                      className="bg-blue-50 rounded-lg p-3 border border-blue-100 hover:border-blue-300 transition-colors"
+                      className="bg-blue-50 rounded-lg p-2.5 border border-blue-100 hover:border-blue-300 transition-colors"
                     >
-                      <div className="font-semibold text-sm text-gray-800 mb-1 truncate">
+                      <div className="font-semibold text-xs text-gray-800 mb-0.5 truncate">
                         {scan.roleTitle}
                       </div>
-                      <div className="text-xs text-gray-600 mb-1 truncate">
+                      <div className="text-[10px] text-gray-600 mb-0.5 truncate">
                         {scan.companyName}
                       </div>
-                      <div className="text-xs text-gray-400">
+                      <div className="text-[9px] text-gray-400">
                         {scan.date} • {scan.time}
                       </div>
                     </div>
@@ -572,7 +482,7 @@ export default function NoninoResumeOptimizer() {
                       Optimization Complete!
                     </h3>
                     <p className="text-sm text-green-700">
-                      Your optimized resume and cover letter are ready for download.
+                      Your optimized resume and cover letter are ready to view.
                     </p>
                   </div>
                 </div>
@@ -593,22 +503,13 @@ export default function NoninoResumeOptimizer() {
                       <FileText className="w-6 h-6 text-blue-600 mr-2" />
                       Optimized Resume
                     </h2>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => downloadAsDocx(results.optimizedResume, 'optimized-resume')}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                      >
-                        <Download className="w-4 h-4 mr-1" />
-                        DOCX
-                      </button>
-                      <button
-                        onClick={() => downloadAsPdf(results.optimizedResume, 'optimized-resume')}
-                        className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                      >
-                        <Download className="w-4 h-4 mr-1" />
-                        PDF
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => previewDocument(results.optimizedResume, 'resume')}
+                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Open Document
+                    </button>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 max-h-96 overflow-y-auto">
                     <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans">
@@ -623,22 +524,13 @@ export default function NoninoResumeOptimizer() {
                       <FileText className="w-6 h-6 text-blue-600 mr-2" />
                       Customized Cover Letter
                     </h2>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => downloadAsDocx(results.coverLetter, 'cover-letter')}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                      >
-                        <Download className="w-4 h-4 mr-1" />
-                        DOCX
-                      </button>
-                      <button
-                        onClick={() => downloadAsPdf(results.coverLetter, 'cover-letter')}
-                        className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
-                      >
-                        <Download className="w-4 h-4 mr-1" />
-                        PDF
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => previewDocument(results.coverLetter, 'coverletter')}
+                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Open Document
+                    </button>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 max-h-96 overflow-y-auto">
                     <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans">
