@@ -275,10 +275,9 @@ export default function NoninoResumeOptimizer() {
     return paragraphs;
   };
 
-  const openInWord = async (content, documentType) => {
-    try {
-      alert('Button clicked! Starting export...');
-      console.log('Starting Word export...');
+const openInWord = async (content, documentType) => {
+  try {
+    console.log('Starting Word export...');
       const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
       const fileName = documentType === 'resume' 
         ? `King_${firstLetter}_Resume`
