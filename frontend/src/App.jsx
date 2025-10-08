@@ -176,15 +176,121 @@ export default function NoninoResumeOptimizer() {
   };
 
   const convertTextToParagraphs = (text) => {
-    return text.split('\n').map(line => {
-      if (line.trim() === '') {
-        return new Paragraph({ text: "" });
+    const lines = text.split('\n');
+    const paragraphs = [];
+    let isFirstLine = true;
+    
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+      
+      // Empty line
+      if (trimmedLine === '') {
+        paragraphs.push(new Paragraph({ 
+          text: "",
+          spacing: { after: 100 }
+        }));
+        return;
       }
-      return new Paragraph({
-        children: [new TextRun(line)],
-        spacing: { after: 100 },
-      });
+      
+      // First line (Name) - Centered, 16pt, Bold
+      if (isFirstLine && trimmedLine.length > 0) {
+        isFirstLine = false;
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            bold: true,
+            size: 32, // 16pt = 32 half-points
+            font: "Calibri"
+          })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 }
+        }));
+        return;
+      }
+      
+      // Contact info line (second line) - Centered, 11pt
+      if (index === 1) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            size: 22, // 11pt = 22 half-points
+            font: "Calibri"
+          })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 }
+        }));
+        return;
+      }
+      
+      // Section Headers (ALL CAPS lines) - Bold, 13pt, Navy
+      if (trimmedLine === trimmedLine.toUpperCase() && 
+          trimmedLine.length < 50 && 
+          !trimmedLine.startsWith('-') &&
+          !trimmedLine.includes('|')) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            bold: true,
+            size: 26, // 13pt = 26 half-points
+            font: "Calibri",
+            color: "1E3A8A" // Navy blue
+          })],
+          spacing: { before: 200, after: 100 },
+          border: {
+            bottom: {
+              color: "1E3A8A",
+              space: 1,
+              style: "single",
+              size: 6
+            }
+          }
+        }));
+        return;
+      }
+      
+      // Job title lines (contain company name with |)
+      if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            bold: true,
+            size: 22, // 11pt
+            font: "Calibri"
+          })],
+          spacing: { before: 150, after: 50 }
+        }));
+        return;
+      }
+      
+      // Bullet points
+      if (trimmedLine.startsWith('-')) {
+        const bulletText = trimmedLine.substring(1).trim();
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: bulletText,
+            size: 22, // 11pt
+            font: "Calibri"
+          })],
+          bullet: {
+            level: 0
+          },
+          spacing: { after: 100 }
+        }));
+        return;
+      }
+      
+      // Regular text
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          size: 22, // 11pt
+          font: "Calibri"
+        })],
+        spacing: { after: 100 }
+      }));
     });
+    
+    return paragraphs;
   };
 
   const openInWord = async (content, documentType) => {
@@ -197,9 +303,34 @@ export default function NoninoResumeOptimizer() {
 
     const doc = new Document({
       sections: [{
-        properties: {},
+        properties: {
+          page: {
+            margin: {
+              top: 1080,    // 0.75" in twips (1440 twips = 1 inch)
+              bottom: 1080, // 0.75"
+              left: 1008,   // 0.7"
+              right: 1008   // 0.7"
+            }
+          }
+        },
         children: contentParagraphs,
       }],
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Calibri",
+              size: 22 // 11pt default
+            },
+            paragraph: {
+              spacing: {
+                line: 276, // 1.15 line spacing (276 = 1.15 * 240)
+                after: 100
+              }
+            }
+          }
+        }
+      }
     });
 
     const blob = await Packer.toBlob(doc);
