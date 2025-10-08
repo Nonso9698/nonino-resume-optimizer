@@ -235,15 +235,7 @@ export default function NoninoResumeOptimizer() {
             font: "Calibri",
             color: "1E3A8A" // Navy blue
           })],
-          spacing: { before: 200, after: 100 },
-          border: {
-            bottom: {
-              color: "1E3A8A",
-              space: 1,
-              style: "single",
-              size: 6
-            }
-          }
+          spacing: { before: 200, after: 100 }
         }));
         return;
       }
