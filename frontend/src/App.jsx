@@ -176,20 +176,19 @@ export default function NoninoResumeOptimizer() {
     }
   };
 
-  const convertTextToParagraphs = (text) => {
+ const convertTextToParagraphs = (text) => {
   const lines = text.split('\n');
   const paragraphs = [];
   let isFirstLine = true;
-  let inEducationSection = false;
   
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
     
-    // Empty line - reduced spacing
+    // Empty line
     if (trimmedLine === '') {
       paragraphs.push(new Paragraph({ 
         text: "",
-        spacing: { after: 50 }
+        spacing: { after: 100 }
       }));
       return;
     }
@@ -205,7 +204,7 @@ export default function NoninoResumeOptimizer() {
           font: "Calibri"
         })],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 150 }
+        spacing: { after: 200 }
       }));
       return;
     }
@@ -219,7 +218,7 @@ export default function NoninoResumeOptimizer() {
           font: "Calibri"
         })],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 150 }
+        spacing: { after: 200 }
       }));
       return;
     }
@@ -229,10 +228,6 @@ export default function NoninoResumeOptimizer() {
         trimmedLine.length < 50 && 
         !trimmedLine.startsWith('-') &&
         !trimmedLine.includes('|')) {
-      
-      // Track if we're in EDUCATION section
-      inEducationSection = trimmedLine.includes('EDUCATION');
-      
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
@@ -241,44 +236,13 @@ export default function NoninoResumeOptimizer() {
           font: "Calibri",
           color: "1E3A8A"
         })],
-        spacing: { before: 150, after: 80 }
-      }));
-      return;
-    }
-    
-    // School names (in EDUCATION section, before degree line)
-    if (inEducationSection && !trimmedLine.startsWith('-') && 
-        !trimmedLine.match(/bachelor|master|phd|associate|diploma|science|arts|technology|management/i) &&
-        !trimmedLine.includes('|')) {
-      paragraphs.push(new Paragraph({
-        children: [new TextRun({ 
-          text: trimmedLine,
-          bold: true,
-          size: 23,  // Slightly larger than degree
-          font: "Calibri"
-        })],
-        spacing: { before: 100, after: 30 }
-      }));
-      return;
-    }
-    
-    // Degree lines (contains Bachelor, Master, etc) - smaller, under school
-    if (trimmedLine.match(/bachelor|master|phd|associate|diploma|science|arts|technology|management/i) && 
-        !trimmedLine.includes('|') && inEducationSection) {
-      paragraphs.push(new Paragraph({
-        children: [new TextRun({ 
-          text: trimmedLine,
-          size: 20,  // Smaller than school name
-          font: "Calibri"
-        })],
-        spacing: { after: 80 }
+        spacing: { before: 200, after: 100 }
       }));
       return;
     }
     
     // Job title lines (contain company name with |)
     if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
-      inEducationSection = false;  // We're out of education section
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
@@ -286,14 +250,13 @@ export default function NoninoResumeOptimizer() {
           size: 22,
           font: "Calibri"
         })],
-        spacing: { before: 120, after: 40 }
+        spacing: { before: 150, after: 50 }
       }));
       return;
     }
     
     // Bullet points
     if (trimmedLine.startsWith('-')) {
-      inEducationSection = false;
       const bulletText = trimmedLine.substring(1).trim();
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
@@ -304,19 +267,19 @@ export default function NoninoResumeOptimizer() {
         bullet: {
           level: 0
         },
-        spacing: { after: 60 }
+        spacing: { after: 100 }
       }));
       return;
     }
     
-    // Regular text (certifications, skills, etc)
+    // Regular text
     paragraphs.push(new Paragraph({
       children: [new TextRun({ 
         text: trimmedLine,
         size: 22,
         font: "Calibri"
       })],
-      spacing: { after: 60 }
+      spacing: { after: 100 }
     }));
   });
   
