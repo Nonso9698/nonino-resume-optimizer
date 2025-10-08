@@ -286,14 +286,19 @@ export default function NoninoResumeOptimizer() {
   };
 
   const openInWord = async (content, documentType) => {
-    const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
-    const fileName = documentType === 'resume' 
-      ? `King_${firstLetter}_Resume`
-      : `King_${firstLetter}_CoverLetter`;
+    try {
+      alert('Button clicked! Starting export...');
+      console.log('Starting Word export...');
+      const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
+      const fileName = documentType === 'resume' 
+        ? `King_${firstLetter}_Resume`
+        : `King_${firstLetter}_CoverLetter`;
 
-    const contentParagraphs = convertTextToParagraphs(content);
+      console.log('Converting to paragraphs...');
+      const contentParagraphs = convertTextToParagraphs(content);
 
-    const doc = new Document({
+      console.log('Creating document...');
+      const doc = new Document({
       sections: [{
         properties: {
           page: {
@@ -325,9 +330,18 @@ export default function NoninoResumeOptimizer() {
       }
     });
 
+    console.log('Packing document...');
     const blob = await Packer.toBlob(doc);
+    console.log('Blob created, size:', blob.size);
+    
+    console.log('Saving file...');
     saveAs(blob, `${fileName}.docx`);
-  };
+    console.log('File save triggered!');
+  } catch (error) {
+    console.error('Error creating Word document:', error);
+    alert('Error creating Word document: ' + error.message);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-950">
