@@ -188,11 +188,11 @@ export default function NoninoResumeOptimizer() {
   };
 
   const downloadAsDocx = async (content, filename) => {
-    const safeCompanyName = formData.companyName.replace(/[^a-z0-9]/gi, '_');
+    const firstLetter = formData.companyName.charAt(0).toUpperCase();
     const safeRoleName = formData.roleTitle.replace(/[^a-z0-9]/gi, '_');
     const baseFilename = filename.includes('resume') 
-      ? `${safeCompanyName}_${safeRoleName}_Resume`
-      : `${safeCompanyName}_${safeRoleName}_CoverLetter`;
+      ? `King_${firstLetter}`
+      : `King_${firstLetter}_CoverLetter`;
 
     const contentParagraphs = convertTextToParagraphs(content);
 
