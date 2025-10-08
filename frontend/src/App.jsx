@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Eye } from 'lucide-react';
+import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Eye, RefreshCw } from 'lucide-react';
 import { Document, Paragraph, TextRun, Packer, AlignmentType } from 'docx';
 import { saveAs } from 'file-saver';
 
@@ -79,6 +79,7 @@ export default function NoninoResumeOptimizer() {
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [isUsingDefaultResume, setIsUsingDefaultResume] = useState(true);
   const [scanHistory, setScanHistory] = useState([]);
+  const [mode, setMode] = useState('optimizer'); // 'optimizer' or 'new-resume'
 
   const API_URL = '/api';
 
@@ -89,11 +90,12 @@ export default function NoninoResumeOptimizer() {
     }
   }, []);
 
-  const saveScanToHistory = (roleTitle, companyName) => {
+  const saveScanToHistory = (roleTitle, companyName, mode) => {
     const newScan = {
       id: Date.now(),
       roleTitle,
       companyName,
+      mode: mode === 'optimizer' ? 'Optimized' : 'New Resume',
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString()
     };
@@ -139,7 +141,9 @@ export default function NoninoResumeOptimizer() {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/generate`, {
+      const endpoint = mode === 'optimizer' ? '/generate' : '/generate-new';
+      
+      const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -164,7 +168,7 @@ export default function NoninoResumeOptimizer() {
         feedback: result.data.feedback
       });
 
-      saveScanToHistory(formData.roleTitle, formData.companyName);
+      saveScanToHistory(formData.roleTitle, formData.companyName, mode);
     } catch (err) {
       setError(err.message || 'Failed to generate content. Please try again.');
     } finally {
@@ -275,9 +279,9 @@ export default function NoninoResumeOptimizer() {
     return paragraphs;
   };
 
-const openInWord = async (content, documentType) => {
-  try {
-    console.log('Starting Word export...');
+  const openInWord = async (content, documentType) => {
+    try {
+      console.log('Starting Word export...');
       const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
       const fileName = documentType === 'resume' 
         ? `King_${firstLetter}_Resume`
@@ -335,15 +339,49 @@ const openInWord = async (content, documentType) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-950">
       <div className="bg-blue-950/50 backdrop-blur-sm border-b border-blue-700/30 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-blue-400 to-blue-600 p-2 rounded-lg">
-              <Sparkles className="w-6 h-6 text-white" />
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-blue-400 to-blue-600 p-2 rounded-lg">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Nonino Resume Optimizer</h1>
+                <p className="text-xs text-blue-300">AI-Powered Career Enhancement</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Nonino Resume Optimizer</h1>
-              <p className="text-xs text-blue-300">AI-Powered Career Enhancement</p>
-            </div>
+          </div>
+          
+          {/* Mode Toggle */}
+          <div className="flex items-center justify-center gap-2 bg-blue-900/50 rounded-xl p-1">
+            <button
+              onClick={() => {
+                setMode('optimizer');
+                setResults(null);
+              }}
+              className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                mode === 'optimizer'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-blue-200 hover:text-white'
+              }`}
+            >
+              <Sparkles className="w-4 h-4 inline mr-2" />
+              Resume Optimizer
+            </button>
+            <button
+              onClick={() => {
+                setMode('new-resume');
+                setResults(null);
+              }}
+              className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                mode === 'new-resume'
+                  ? 'bg-green-600 text-white shadow-lg'
+                  : 'text-blue-200 hover:text-white'
+              }`}
+            >
+              <RefreshCw className="w-4 h-4 inline mr-2" />
+              New Resume
+            </button>
           </div>
         </div>
       </div>
@@ -369,6 +407,13 @@ const openInWord = async (content, documentType) => {
                       key={scan.id} 
                       className="bg-blue-50 rounded-lg p-2.5 border border-blue-100 hover:border-blue-300 transition-colors"
                     >
+                      <div className="flex items-center gap-1 mb-1">
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded ${
+                          scan.mode === 'Optimized' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'
+                        }`}>
+                          {scan.mode}
+                        </span>
+                      </div>
                       <div className="font-semibold text-xs text-gray-800 mb-0.5 truncate">
                         {scan.roleTitle}
                       </div>
@@ -386,6 +431,26 @@ const openInWord = async (content, documentType) => {
           </div>
 
           <div className="lg:col-span-3">
+            {/* Mode Description */}
+            <div className={`mb-6 rounded-2xl p-4 border-2 ${
+              mode === 'optimizer'
+                ? 'bg-blue-50 border-blue-200'
+                : 'bg-green-50 border-green-200'
+            }`}>
+              <h3 className={`font-bold text-sm mb-1 ${
+                mode === 'optimizer' ? 'text-blue-800' : 'text-green-800'
+              }`}>
+                {mode === 'optimizer' ? '📝 Resume Optimizer Mode' : '🆕 New Resume Mode'}
+              </h3>
+              <p className={`text-xs ${
+                mode === 'optimizer' ? 'text-blue-700' : 'text-green-700'
+              }`}>
+                {mode === 'optimizer'
+                  ? 'Keeps your exact job titles, companies, and dates. Only optimizes bullet points to match the job description.'
+                  : 'Keeps companies and dates the same, but creates a logical career progression with new job titles leading to your target role.'}
+              </p>
+            </div>
+
             {error && (
               <div className="mb-6 bg-red-50 border-2 border-red-300 rounded-2xl p-4 flex items-start shadow-lg">
                 <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
@@ -416,11 +481,11 @@ const openInWord = async (content, documentType) => {
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Role Title <span className="text-red-500">*</span>
+                          Target Role <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
-                          placeholder="e.g., Senior GRC Analyst"
+                          placeholder="e.g., Software Engineer, Data Analyst"
                           value={formData.roleTitle}
                           onChange={(e) => setFormData(prev => ({ ...prev, roleTitle: e.target.value }))}
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -489,17 +554,21 @@ const openInWord = async (content, documentType) => {
                   <button
                     onClick={generateOptimizedContent}
                     disabled={isGenerating}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:scale-[1.02]"
+                    className={`w-full font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:scale-[1.02] ${
+                      mode === 'optimizer'
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
+                        : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
+                    }`}
                   >
                     {isGenerating ? (
                       <>
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Optimizing Your Resume...
+                        {mode === 'optimizer' ? 'Optimizing Your Resume...' : 'Creating New Resume...'}
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-5 h-5 mr-2" />
-                        Generate Optimized Resume & Cover Letter
+                        {mode === 'optimizer' ? <Sparkles className="w-5 h-5 mr-2" /> : <RefreshCw className="w-5 h-5 mr-2" />}
+                        {mode === 'optimizer' ? 'Generate Optimized Resume & Cover Letter' : 'Generate New Resume & Cover Letter'}
                       </>
                     )}
                   </button>
@@ -513,10 +582,10 @@ const openInWord = async (content, documentType) => {
                   <CheckCircle className="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
                   <div>
                     <h3 className="font-bold text-green-800 mb-1">
-                      Optimization Complete!
+                      Generation Complete!
                     </h3>
                     <p className="text-sm text-green-700">
-                      Your optimized resume and cover letter are ready to view.
+                      Your {mode === 'optimizer' ? 'optimized' : 'new'} resume and cover letter are ready to view.
                     </p>
                   </div>
                 </div>
@@ -535,7 +604,7 @@ const openInWord = async (content, documentType) => {
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-gray-800 flex items-center">
                       <FileText className="w-6 h-6 text-blue-600 mr-2" />
-                      Optimized Resume
+                      {mode === 'optimizer' ? 'Optimized Resume' : 'New Resume'}
                     </h2>
                     <button
                       onClick={() => openInWord(results.optimizedResume, 'resume')}
@@ -589,7 +658,7 @@ const openInWord = async (content, documentType) => {
                   }}
                   className="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
                 >
-                  Start New Optimization
+                  Start New Generation
                 </button>
               </div>
             )}
