@@ -50,6 +50,12 @@ CRITICAL RULES:
 5. Incorporate keywords from the job description naturally
 6. Focus on results and measurable outcomes
 7. Keep the same resume structure and sections
+8. VERIFY TIMELINE REALISM: Ensure all achievements, metrics, and accomplishments are realistic and achievable within the actual time period worked at each organization. For example:
+   - If someone worked 6 months, don't claim they "led a 3-year transformation"
+   - If someone worked 1 year, don't claim they "managed 500+ projects" unless the original resume supports high volume
+   - Scale achievements proportionally to the employment duration
+   - Keep metrics realistic: review velocity, project counts, team sizes should match what's feasible in the given timeframe
+   - If the original resume has inflated claims that don't match the timeline, adjust them to be more realistic while still being impressive
 
 You must respond with ONLY valid JSON in this exact format:
 {
