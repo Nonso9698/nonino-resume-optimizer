@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FileText, Briefcase, Upload, Loader2, Download, CheckCircle, AlertCircle } from 'lucide-react';
+import { Document, Paragraph, TextRun, AlignmentType, Packer } from 'docx';
+import { saveAs } from 'file-saver';
 
 const DEFAULT_RESUME = `KING N. IHE., CISA
 Charlotte, NC | 704-387-0104 | Nonso.King.Ihe@gmail.com | linkedin.com/in/king-n-i-ab994133b
@@ -148,7 +150,87 @@ export default function ResumeOptimizerApp() {
     }
   };
 
-  const downloadAsFile = (content, filename, format = 'docx') => {
+  const createTrackingHeader = () => {
+    return [
+      new Paragraph({
+        text: "=================================",
+        alignment: AlignmentType.LEFT,
+      }),
+      new Paragraph({
+        text: "TRACKING INFORMATION",
+        alignment: AlignmentType.LEFT,
+        bold: true,
+      }),
+      new Paragraph({
+        text: "=================================",
+        alignment: AlignmentType.LEFT,
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "Company: ", bold: true }),
+          new TextRun(formData.companyName || 'N/A'),
+        ],
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "Role: ", bold: true }),
+          new TextRun(formData.roleTitle),
+        ],
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "Date Applied: ", bold: true }),
+          new TextRun(formData.dateApplied),
+        ],
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "Resume Name: ", bold: true }),
+          new TextRun(formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.replace(/\s+/g, '_')),
+        ],
+      }),
+      new Paragraph({
+        text: "=================================",
+        alignment: AlignmentType.LEFT,
+      }),
+      new Paragraph({ text: "" }), // Empty line
+    ];
+  };
+
+  const convertTextToParagraphs = (text) => {
+    return text.split('\n').map(line => {
+      if (line.trim() === '') {
+        return new Paragraph({ text: "" });
+      }
+      return new Paragraph({
+        children: [new TextRun(line)],
+        spacing: { after: 100 },
+      });
+    });
+  };
+
+  const downloadAsDocx = async (content, filename) => {
+    const safeCompanyName = formData.companyName.replace(/[^a-z0-9]/gi, '_');
+    const safeRoleName = formData.roleTitle.replace(/[^a-z0-9]/gi, '_');
+    const baseFilename = filename.includes('resume') 
+      ? `${safeCompanyName}_${safeRoleName}_Resume_${formData.dateApplied}`
+      : `${safeCompanyName}_${safeRoleName}_CoverLetter_${formData.dateApplied}`;
+
+    const trackingParagraphs = createTrackingHeader();
+    const contentParagraphs = convertTextToParagraphs(content);
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [...trackingParagraphs, ...contentParagraphs],
+      }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `${baseFilename}.docx`);
+  };
+
+  const downloadAsPdf = (content) => {
     const trackingInfo = `=================================
 TRACKING INFORMATION
 =================================
@@ -161,72 +243,43 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
 `;
     const contentWithTracking = trackingInfo + content;
     
-    const safeCompanyName = formData.companyName.replace(/[^a-z0-9]/gi, '_');
-    const safeRoleName = formData.roleTitle.replace(/[^a-z0-9]/gi, '_');
-    const baseFilename = filename.includes('resume') 
-      ? `${safeCompanyName}_${safeRoleName}_Resume_${formData.dateApplied}`
-      : `${safeCompanyName}_${safeRoleName}_CoverLetter_${formData.dateApplied}`;
-    
-    if (format === 'pdf') {
-      const printWindow = window.open('', '_blank');
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${baseFilename}</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 40px;
-              line-height: 1.6;
-              color: #333;
-            }
-            pre {
-              white-space: pre-wrap;
-              word-wrap: break-word;
-              font-family: Arial, sans-serif;
-              font-size: 11pt;
-            }
-            @media print {
-              body { margin: 20mm; }
-            }
-          </style>
-        </head>
-        <body>
-          <pre>${contentWithTracking}</pre>
-          <script>
-            window.onload = function() {
-              window.print();
-              setTimeout(function() { window.close(); }, 100);
-            }
-          </script>
-        </body>
-        </html>
-      `;
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-    } else if (format === 'docx') {
-      const docxContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:body>
-    <w:p>
-      <w:r>
-        <w:t xml:space="preserve">${contentWithTracking.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">')}</w:t>
-      </w:r>
-    </w:p>
-  </w:body>
-</w:document>`;
-      
-      const blob = new Blob([docxContent], { 
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${baseFilename}.docx`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    const printWindow = window.open('', '_blank');
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Document</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+            color: #333;
+          }
+          pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+          }
+          @media print {
+            body { margin: 20mm; }
+          }
+        </style>
+      </head>
+      <body>
+        <pre>${contentWithTracking}</pre>
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 100);
+          }
+        </script>
+      </body>
+      </html>
+    `;
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   return (
@@ -421,14 +474,14 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                 </h2>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => downloadAsFile(results.optimizedResume, 'optimized-resume', 'docx')}
+                    onClick={() => downloadAsDocx(results.optimizedResume, 'optimized-resume')}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center"
                   >
                     <Download className="w-4 h-4 mr-1" />
                     DOCX
                   </button>
                   <button
-                    onClick={() => downloadAsFile(results.optimizedResume, 'optimized-resume', 'pdf')}
+                    onClick={() => downloadAsPdf(results.optimizedResume)}
                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition flex items-center"
                   >
                     <Download className="w-4 h-4 mr-1" />
@@ -451,14 +504,14 @@ Resume Name: ${formData.resumeName || 'King_Ihe_Resume_' + formData.companyName.
                 </h2>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => downloadAsFile(results.coverLetter, 'cover-letter', 'docx')}
+                    onClick={() => downloadAsDocx(results.coverLetter, 'cover-letter')}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition flex items-center"
                   >
                     <Download className="w-4 h-4 mr-1" />
                     DOCX
                   </button>
                   <button
-                    onClick={() => downloadAsFile(results.coverLetter, 'cover-letter', 'pdf')}
+                    onClick={() => downloadAsPdf(results.coverLetter)}
                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition flex items-center"
                   >
                     <Download className="w-4 h-4 mr-1" />
