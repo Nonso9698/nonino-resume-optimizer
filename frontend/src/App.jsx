@@ -8,7 +8,6 @@ import {
   AlertCircle,
   History,
   Sparkles,
-  Eye,
 } from "lucide-react";
 import {
   Document,
@@ -19,11 +18,12 @@ import {
 } from "docx";
 import { saveAs } from "file-saver";
 
+// Default resume text
 const DEFAULT_RESUME = `KING N. IHE., CISA
 Charlotte, NC | 704-387-0104 | Nonso.King.Ihe@gmail.com | linkedin.com/in/king-n-i-ab994133b
 
 PROFESSIONAL SUMMARY
-CISA-certified GRC professional who reduced regulatory audit preparation time by 50% and managed risk assessments for 500+ vendor relationships across Wells Fargo and Bank of America. Expertise in ServiceNow GRC automation, SOX compliance, and third-party risk management with proven ability to achieve zero critical audit findings through systematic control testing and remediation tracking. Combines technical risk assessment skills with business process optimization to deliver measurable compliance cost reductions and operational efficiency gains.
+CISA-certified GRC professional who reduced regulatory audit preparation time by 50% and managed risk assessments for 500+ vendor relationships across Wells Fargo and Bank of America. Expertise in ServiceNow GRC automation, SOX compliance, and third-party risk management with proven ability to achieve zero critical audit findings through systematic control testing and remediation tracking.
 
 CORE COMPETENCIES
 Third-Party Risk Management (TPRM) • Vendor Due Diligence • Enterprise Risk Assessment • Operational Risk Analysis • SOX IT General Controls • PCI DSS Assessment • NIST Cybersecurity Framework • ISO 27001 Implementation • Internal Controls Testing • SOC 2 Type II Support • Control Design Evaluation • Remediation Tracking • ServiceNow GRC Administration • Splunk Security Analytics • Nessus Vulnerability Assessment • RSA Archer
@@ -32,54 +32,31 @@ PROFESSIONAL EXPERIENCE
 GRC Consultant
 Octasquare Inc | Charlotte, NC (Remote) | June 2024 – Present
 
-- Conduct comprehensive HITRUST risk assessments across 6 healthcare client environments, identifying access control vulnerabilities and data encryption gaps while developing prioritized remediation roadmaps that reduced vulnerability exposure by 25%
-- Led standardization of third-party vendor risk evaluation processes for 50+ critical suppliers, developing risk scoring methodology that decreased assessment cycle time from 45 to 30 days
-- Execute PCI DSS compliance gap analyses for payment processing environments, documenting control deficiencies and collaborating with IT teams and business owners on remediation activities with 85% closure rate within regulatory timelines
-- Built real-time risk monitoring dashboards in Splunk, eliminating 35% of manual reporting tasks and providing executive visibility into compliance metrics across client portfolios
+- Conducted HITRUST risk assessments across 6 healthcare client environments
+- Led standardization of vendor risk evaluation processes for 50+ critical suppliers
+- Built real-time risk dashboards in Splunk, cutting 35% manual reporting tasks
 
 Information Security Compliance Specialist
 Bank of America | Charlotte, NC | March 2023 – June 2024
 
-- Managed ServiceNow GRC platform operations within 8-person risk team, serving 200+ users across audit and risk functions while deploying automated workflows that reduced manual documentation by 30%
-- Coordinated OCC regulatory examination preparation across 15 business units under senior manager oversight, managing control testing documentation and artifact collection that resulted in zero critical findings
-- Monitored SOX IT General Controls program covering 250+ quarterly control tests within $2.4 trillion asset bank, maintaining 95% compliance with Sarbanes-Oxley and BSA/AML regulatory requirements
-- Coordinated meetings with audit, risk, and business teams, improving examination response time by 40% and standardizing evidence collection processes across the enterprise
+- Managed ServiceNow GRC platform operations within 8-person risk team
+- Coordinated OCC regulatory exam preparation across 15 business units
+- Maintained 95% compliance with SOX control testing
 
 Internal Audit and Compliance Specialist
 Wells Fargo | Charlotte, NC | December 2019 – August 2023
 
-- Managed third-party vendor risk assessment program covering 500+ relationships within 12-person compliance team at $1.9 trillion asset institution, developing automated risk scoring that reduced initial evaluation time from 8 to 5 business days
-- Deployed ISO 27001-aligned security control framework across technology operations, training 150+ staff and achieving 90% adoption rate within 18 months under director supervision
-- Performed quarterly IT General Controls testing for 12 critical applications, identifying and tracking remediation of control deficiencies with business process owners and achieving 88% resolution rate
-- Contributed to SOC 2 Type II audit processes through detailed control documentation and testing evidence, maintaining clean audit opinions across 8 business areas
+- Managed vendor risk program for 500+ suppliers
+- Deployed ISO 27001-aligned security control framework
+- Supported clean SOC 2 Type II audit outcomes
 
 CERTIFICATIONS
-- Certified Information Systems Auditor (CISA)
-- CompTIA Security+ (SY0-701)
-- AWS Certified Solutions Architect – Associate (SAA-C03)
-- Microsoft Certified: Azure Fundamentals (AZ-900)
-- Google Project Management Professional Certificate
-- Certified in Cybersecurity
+CISA | Security+ | AWS Certified Solutions Architect | Azure Fundamentals | Google Project Management Certificate
 
 EDUCATION
-- Master of Science, Information Technology Management
-Western Governors University | Salt Lake City, UT | 2020-2021
-- Bachelor of Science, Real Estate Management
-Abia State University | Uturu, | 2012
-
-KEY ACHIEVEMENTS
-- Reduced vendor risk assessment cycle time by 33% through automated scoring implementation
-- Decreased regulatory examination preparation time by 40% via standardized documentation processes
-- Eliminated 30-35% of manual reporting tasks through workflow automation and dashboard development
-- Maintained 95% SOX control testing completion rate across 250+ quarterly assessments
-- Achieved 85-88% deficiency remediation closure rate within established regulatory timelines
-- Successfully supported zero critical findings during federal OCC examination
-- Managed risk assessment operations for 500+ third-party vendor relationships
-- Led security control framework adoption achieving 90% organizational implementation rate
-- Supported clean SOC 2 Type II audit opinions across multiple business processes
-
-TECHNICAL SKILLS
-ServiceNow GRC (Administration & Workflow Design) • RSA Archer • AuditBoard • Splunk (Dashboard Creation & Analytics) • Nessus Professional • Qualys VMDR • AWS Security Services (IAM, CloudTrail, GuardDuty) • Microsoft Azure Security Center • Advanced Excel (Pivot Tables, Macros, Statistical Analysis) • SQL Database Queries • Power BI`;
+Master of Science, Information Technology Management – Western Governors University
+Bachelor of Science, Real Estate Management – Abia State University
+`;
 
 export default function NoninoResumeOptimizer() {
   const [formData, setFormData] = useState({
@@ -99,9 +76,7 @@ export default function NoninoResumeOptimizer() {
 
   useEffect(() => {
     const savedHistory = localStorage.getItem("noninoScanHistory");
-    if (savedHistory) {
-      setScanHistory(JSON.parse(savedHistory));
-    }
+    if (savedHistory) setScanHistory(JSON.parse(savedHistory));
   }, []);
 
   const saveScanToHistory = (roleTitle, companyName) => {
@@ -112,24 +87,18 @@ export default function NoninoResumeOptimizer() {
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
     };
-    const updatedHistory = [newScan, ...scanHistory].slice(0, 10);
-    setScanHistory(updatedHistory);
-    localStorage.setItem("noninoScanHistory", JSON.stringify(updatedHistory));
+    const updated = [newScan, ...scanHistory].slice(0, 10);
+    setScanHistory(updated);
+    localStorage.setItem("noninoScanHistory", JSON.stringify(updated));
   };
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setUploadedFileName(file.name);
     setIsUsingDefaultResume(false);
-
-    if (file.type === "text/plain") {
-      const text = await file.text();
-      setFormData((prev) => ({ ...prev, currentResume: text }));
-    } else {
-      alert("Please use .txt files or paste your resume text directly.");
-    }
+    const text = await file.text();
+    setFormData((prev) => ({ ...prev, currentResume: text }));
   };
 
   const handleResumeTextChange = (e) => {
@@ -150,9 +119,7 @@ export default function NoninoResumeOptimizer() {
       !formData.roleTitle ||
       !formData.companyName
     ) {
-      setError(
-        "Please fill in all required fields (Company Name, Role Title, Job Description, and Resume)."
-      );
+      setError("Please fill all required fields.");
       return;
     }
 
@@ -162,9 +129,7 @@ export default function NoninoResumeOptimizer() {
     try {
       const response = await fetch(`${API_URL}/generate`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           jobDescription: formData.jobDescription,
           currentResume: formData.currentResume,
@@ -172,10 +137,8 @@ export default function NoninoResumeOptimizer() {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Request failed: ${response.status}`);
-      }
+      if (!response.ok)
+        throw new Error(`Request failed: ${response.status}`);
 
       const result = await response.json();
       setResults({
@@ -183,10 +146,9 @@ export default function NoninoResumeOptimizer() {
         coverLetter: result.data.coverLetter,
         feedback: result.data.feedback,
       });
-
       saveScanToHistory(formData.roleTitle, formData.companyName);
     } catch (err) {
-      setError(err.message || "Failed to generate content. Please try again.");
+      setError(err.message || "Failed to generate content.");
     } finally {
       setIsGenerating(false);
     }
@@ -194,134 +156,60 @@ export default function NoninoResumeOptimizer() {
 
   const convertTextToParagraphs = (text) => {
     const lines = text.split("\n");
-    const paragraphs = [];
-    let isFirstLine = true;
+    return lines.map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed)
+        return new Paragraph({ text: "", spacing: { after: 100 } });
 
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      if (trimmedLine === "") {
-        paragraphs.push(new Paragraph({ text: "", spacing: { after: 100 } }));
-        return;
-      }
-
-      if (isFirstLine && trimmedLine.length > 0) {
-        isFirstLine = false;
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: trimmedLine,
-                bold: true,
-                size: 32,
-                font: "Calibri",
-              }),
-            ],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 200 },
-          })
-        );
-        return;
-      }
-
-      if (index === 1) {
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: trimmedLine,
-                size: 22,
-                font: "Calibri",
-              }),
-            ],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 200 },
-          })
-        );
-        return;
-      }
-
+      // Heading (ALL CAPS)
       if (
-        trimmedLine === trimmedLine.toUpperCase() &&
-        trimmedLine.length < 50 &&
-        !trimmedLine.startsWith("-") &&
-        !trimmedLine.includes("|")
+        trimmed === trimmed.toUpperCase() &&
+        trimmed.length < 60 &&
+        !trimmed.startsWith("-")
       ) {
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: trimmedLine,
-                bold: true,
-                size: 26,
-                font: "Calibri",
-                color: "1E3A8A",
-              }),
-            ],
-            spacing: { before: 200, after: 100 },
-          })
-        );
-        return;
-      }
-
-      if (trimmedLine.includes("|") && !trimmedLine.startsWith("-")) {
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: trimmedLine,
-                bold: true,
-                size: 22,
-                font: "Calibri",
-              }),
-            ],
-            spacing: { before: 150, after: 50 },
-          })
-        );
-        return;
-      }
-
-      if (trimmedLine.startsWith("-")) {
-        const bulletText = trimmedLine.substring(1).trim();
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: bulletText,
-                size: 22,
-                font: "Calibri",
-              }),
-            ],
-            bullet: { level: 0 },
-            spacing: { after: 100 },
-          })
-        );
-        return;
-      }
-
-      paragraphs.push(
-        new Paragraph({
+        return new Paragraph({
           children: [
             new TextRun({
-              text: trimmedLine,
+              text: trimmed,
+              bold: true,
+              color: "1E3A8A",
+              size: 26,
+              font: "Calibri",
+            }),
+          ],
+          spacing: { before: 200, after: 100 },
+        });
+      }
+
+      // Bullet points
+      if (trimmed.startsWith("-")) {
+        return new Paragraph({
+          children: [
+            new TextRun({
+              text: trimmed.substring(1).trim(),
               size: 22,
               font: "Calibri",
             }),
           ],
+          bullet: { level: 0 },
           spacing: { after: 100 },
-        })
-      );
-    });
+        });
+      }
 
-    return paragraphs;
+      // Normal text
+      return new Paragraph({
+        children: [new TextRun({ text: trimmed, size: 22, font: "Calibri" })],
+        spacing: { after: 100 },
+      });
+    });
   };
 
   const openInWord = async (content, documentType) => {
     try {
       if (!content || content.trim() === "") {
-        alert("No content found to export.");
+        alert("No content to export.");
         return;
       }
-
       const firstLetter =
         formData.companyName?.trim()?.charAt(0)?.toUpperCase() || "X";
       const fileName =
@@ -329,8 +217,7 @@ export default function NoninoResumeOptimizer() {
           ? `King_${firstLetter}_Resume`
           : `King_${firstLetter}_CoverLetter`;
 
-      const contentParagraphs = convertTextToParagraphs(content);
-
+      const paragraphs = convertTextToParagraphs(content);
       const doc = new Document({
         sections: [
           {
@@ -339,7 +226,7 @@ export default function NoninoResumeOptimizer() {
                 margin: { top: 1080, bottom: 1080, left: 1008, right: 1008 },
               },
             },
-            children: contentParagraphs,
+            children: paragraphs,
           },
         ],
       });
@@ -349,15 +236,157 @@ export default function NoninoResumeOptimizer() {
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (error) {
-      console.error("Error creating Word file:", error);
-      alert("Failed to generate the Word document. Check console for details.");
+      console.error(error);
+      alert("Error exporting Word file.");
     }
   };
 
-  // ✅ Everything below (UI) stays exactly the same — no need to change it.
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-950">
-      {/* UI content here (same as before) */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-950 text-white p-6">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-6">
+          Nonino Resume Optimizer
+        </h1>
+
+        {/* === Form Section === */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left: Job info */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4">
+            <h2 className="text-xl font-semibold mb-3 flex items-center">
+              <Briefcase className="w-5 h-5 mr-2" /> Job Information
+            </h2>
+
+            <input
+              type="text"
+              placeholder="Company Name"
+              value={formData.companyName}
+              onChange={(e) =>
+                setFormData({ ...formData, companyName: e.target.value })
+              }
+              className="w-full mb-3 p-2 rounded bg-white/20 placeholder-gray-300"
+            />
+            <input
+              type="text"
+              placeholder="Role Title"
+              value={formData.roleTitle}
+              onChange={(e) =>
+                setFormData({ ...formData, roleTitle: e.target.value })
+              }
+              className="w-full mb-3 p-2 rounded bg-white/20 placeholder-gray-300"
+            />
+            <textarea
+              placeholder="Paste job description here..."
+              value={formData.jobDescription}
+              onChange={(e) =>
+                setFormData({ ...formData, jobDescription: e.target.value })
+              }
+              className="w-full h-48 p-2 rounded bg-white/20 placeholder-gray-300"
+            />
+          </div>
+
+          {/* Right: Resume input */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4">
+            <h2 className="text-xl font-semibold mb-3 flex items-center">
+              <FileText className="w-5 h-5 mr-2" /> Your Resume
+            </h2>
+
+            <div className="flex justify-between items-center mb-2">
+              <label className="cursor-pointer flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200">
+                <Upload className="w-4 h-4" /> Upload Resume (.txt)
+                <input
+                  type="file"
+                  hidden
+                  accept=".txt"
+                  onChange={handleFileUpload}
+                />
+              </label>
+              {!isUsingDefaultResume && (
+                <button
+                  onClick={resetToDefaultResume}
+                  className="text-xs text-red-400 hover:text-red-300"
+                >
+                  Reset to Default
+                </button>
+              )}
+            </div>
+
+            <textarea
+              value={formData.currentResume}
+              onChange={handleResumeTextChange}
+              className="w-full h-72 p-2 rounded bg-white/20 placeholder-gray-300"
+            />
+          </div>
+        </div>
+
+        {/* === Generate Button === */}
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={generateOptimizedContent}
+            disabled={isGenerating}
+            className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" /> Generate Optimized Resume
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* === Output Section === */}
+        {results && (
+          <div className="mt-8 space-y-6">
+            <div className="bg-white/10 p-4 rounded-2xl">
+              <h2 className="text-lg font-semibold mb-3 flex items-center">
+                <FileText className="w-5 h-5 mr-2" /> Optimized Resume
+              </h2>
+              <pre className="whitespace-pre-wrap text-sm bg-black/20 p-3 rounded">
+                {results.optimizedResume}
+              </pre>
+              <button
+                onClick={() => openInWord(results.optimizedResume, "resume")}
+                className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm mt-3"
+              >
+                Open in Word
+              </button>
+            </div>
+
+            <div className="bg-white/10 p-4 rounded-2xl">
+              <h2 className="text-lg font-semibold mb-3 flex items-center">
+                <Briefcase className="w-5 h-5 mr-2" /> Cover Letter
+              </h2>
+              <pre className="whitespace-pre-wrap text-sm bg-black/20 p-3 rounded">
+                {results.coverLetter}
+              </pre>
+              <button
+                onClick={() => openInWord(results.coverLetter, "coverletter")}
+                className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm mt-3"
+              >
+                Open in Word
+              </button>
+            </div>
+
+            <div className="bg-white/10 p-4 rounded-2xl">
+              <h2 className="text-lg font-semibold mb-3 flex items-center">
+                <AlertCircle className="w-5 h-5 mr-2" /> Feedback
+              </h2>
+              <pre className="whitespace-pre-wrap text-sm bg-black/20 p-3 rounded">
+                {results.feedback}
+              </pre>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-600/80 mt-6 p-3 rounded-lg flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" /> {error}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
