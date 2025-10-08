@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Briefcase, Upload, Loader2, Download, CheckCircle, AlertCircle, History, Sparkles } from 'lucide-react';
+import { FileText, Briefcase, Upload, Loader2, Download, CheckCircle, AlertCircle, History, Sparkles, Eye } from 'lucide-react';
 import { Document, Paragraph, TextRun, Packer } from 'docx';
 import { saveAs } from 'file-saver';
 
@@ -185,6 +185,140 @@ export default function NoninoResumeOptimizer() {
         spacing: { after: 100 },
       });
     });
+  };
+
+  const previewDocument = (content, documentType) => {
+    const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
+    const fileName = documentType === 'resume' 
+      ? `King_${firstLetter}_Resume`
+      : `King_${firstLetter}_CoverLetter`;
+    
+    const previewWindow = window.open('', '_blank');
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${fileName}</title>
+        <meta charset="UTF-8">
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+          }
+          .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+          }
+          .toolbar {
+            background: #2563eb;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .toolbar h1 {
+            font-size: 18px;
+            font-weight: 600;
+          }
+          .toolbar button {
+            background: white;
+            color: #2563eb;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+          }
+          .toolbar button:hover {
+            background: #f0f0f0;
+            transform: translateY(-1px);
+          }
+          .editor {
+            padding: 40px;
+            min-height: 600px;
+          }
+          #content {
+            width: 100%;
+            min-height: 500px;
+            border: none;
+            outline: none;
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #333;
+          }
+          .instructions {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-size: 13px;
+          }
+          @media print {
+            body { 
+              background: white;
+              padding: 0;
+            }
+            .toolbar, .instructions { 
+              display: none; 
+            }
+            .container {
+              box-shadow: none;
+              max-width: 100%;
+            }
+            .editor {
+              padding: 20mm;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="toolbar">
+            <h1>📄 ${fileName}</h1>
+            <button onclick="downloadAsDocx()">💾 Download DOCX</button>
+          </div>
+          <div class="editor">
+            <div class="instructions">
+              ✏️ <strong>Edit freely!</strong> You can modify the text below. Click "Download DOCX" when ready to save, or use Ctrl+P to print/save as PDF.
+            </div>
+            <div id="content" contenteditable="true">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+          </div>
+        </div>
+        <script>
+          function downloadAsDocx() {
+            const content = document.getElementById('content').innerText;
+            const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '${fileName}.docx';
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+        </script>
+      </body>
+      </html>
+    `;
+    previewWindow.document.write(htmlContent);
+    previewWindow.document.close();
   };
 
   const downloadAsDocx = async (content, filename) => {
