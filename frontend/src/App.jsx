@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Eye } from 'lucide-react';
-import { Document, Paragraph, TextRun, Packer } from 'docx';
+import { Document, Paragraph, TextRun, Packer, AlignmentType } from 'docx';
 import { saveAs } from 'file-saver';
 
 const DEFAULT_RESUME = `KING N. IHE., CISA
