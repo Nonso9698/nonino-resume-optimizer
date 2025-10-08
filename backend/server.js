@@ -60,7 +60,7 @@ CRITICAL RULES:
 You must respond with ONLY valid JSON in this exact format:
 {
   "optimizedResume": "full resume text with original titles but optimized bullets",
-  "coverLetter": "personalized cover letter (max one-third page)",
+  "coverLetter": "personalized, concise cover letter (maximum 3 short paragraphs - introduction, why you're perfect fit, closing)",
   "feedback": "brief summary of improvements made"
 }`,
         messages: [
@@ -174,7 +174,7 @@ EXAMPLE PROGRESSION:
 You must respond with ONLY valid JSON in this exact format:
 {
   "optimizedResume": "full resume with SAME companies/dates but NEW titles and bullets showing progression",
-  "coverLetter": "personalized cover letter explaining career progression (max one-third page)",
+  "coverLetter": "personalized, concise cover letter explaining career progression (maximum 3 short paragraphs)",
   "feedback": "brief explanation of the career progression created"
 }`,
         messages: [
