@@ -16,7 +16,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
-// Generate optimized resume endpoint
+// Generate optimized resume endpoint (Original - keeps titles)
 app.post('/api/generate', async (req, res) => {
   try {
     const { jobDescription, currentResume, roleTitle } = req.body;
@@ -106,6 +106,121 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
     }
 
     console.log('✅ Generation complete!');
+    
+    res.json({
+      success: true,
+      data: {
+        optimizedResume: parsedContent.optimizedResume,
+        coverLetter: parsedContent.coverLetter,
+        feedback: parsedContent.feedback
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    res.status(500).json({ 
+      error: error.message || 'Failed to generate content' 
+    });
+  }
+});
+
+// NEW: Generate new resume with career progression
+app.post('/api/generate-new', async (req, res) => {
+  try {
+    const { jobDescription, currentResume, roleTitle } = req.body;
+    
+    if (!jobDescription || !currentResume || !roleTitle) {
+      return res.status(400).json({ 
+        error: 'Missing required fields' 
+      });
+    }
+
+    console.log('🆕 Generating NEW resume with career progression for role:', roleTitle);
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8000,
+        temperature: 0.7,
+        system: `You are an expert resume writer specializing in career transitions and progression narratives.
+
+CRITICAL RULES FOR CAREER PROGRESSION GENERATION:
+1. KEEP company names and employment dates EXACTLY as they appear in the original resume
+2. CREATE new job titles that show logical career progression leading to the target role
+3. The progression should be: Entry/Junior → Mid-Level → Senior (matching target)
+4. Generate completely new bullet points for each role that match the new job titles
+5. Ensure the career story is cohesive and shows natural growth
+6. Match the years of experience required in the job description
+7. VERIFY TIMELINE REALISM: Achievements must be realistic for the time worked:
+   - Entry-level roles (oldest company): Basic contributions, learning, assisting
+   - Mid-level roles (middle company): More responsibility, leading small initiatives
+   - Senior roles (recent company): Strategic impact, leadership, major achievements
+   - Scale metrics appropriately: A 6-month role can't have 3-year achievements
+8. Create a professional summary that reflects the new career path
+9. Adjust skills section to match the target role
+10. Keep the same resume structure
+
+EXAMPLE PROGRESSION:
+- Target: Software Engineer
+- Company 1 (2019-2021): Junior Developer or IT Support Specialist
+- Company 2 (2021-2023): Business Analyst or Systems Analyst
+- Company 3 (2023-Present): Software Engineer
+
+You must respond with ONLY valid JSON in this exact format:
+{
+  "optimizedResume": "full resume with SAME companies/dates but NEW titles and bullets showing progression",
+  "coverLetter": "personalized cover letter explaining career progression (max one-third page)",
+  "feedback": "brief explanation of the career progression created"
+}`,
+        messages: [
+          {
+            role: 'user',
+            content: `Target Role: ${roleTitle}
+
+Job Description:
+${jobDescription}
+
+Current Resume (use SAME companies and dates, but create NEW titles showing progression):
+${currentResume}
+
+Please generate:
+1. A NEW resume that keeps the EXACT companies and dates but creates logical job title progression leading to the target role
+2. Each position should have appropriate responsibilities matching that career level
+3. A personalized cover letter explaining the career progression
+4. Brief feedback on the progression strategy used
+
+Respond with ONLY valid JSON in the format specified in the system prompt.`
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || `API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.content[0].text;
+    
+    let parsedContent;
+    try {
+      parsedContent = JSON.parse(content);
+    } catch (parseError) {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsedContent = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('Failed to parse AI response');
+      }
+    }
+
+    console.log('✅ New resume generation complete!');
     
     res.json({
       success: true,
