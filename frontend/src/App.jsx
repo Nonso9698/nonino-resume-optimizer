@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Download, Eye } from 'lucide-react'; // Added Download icon
-import { Document, Paragraph, TextRun, Packer } from 'docx';
+import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Download, Eye } from 'lucide-react'; 
+import { Document, Paragraph, TextRun, Packer, HeadingLevel, AlignmentType, Spacing, IParagraphStyleOptions } from 'docx';
 import { saveAs } from 'file-saver';
 
 // --- (Keep DEFAULT_RESUME constant as it is in your original code) ---
@@ -69,51 +69,202 @@ ServiceNow GRC (Administration & Workflow Design) • RSA Archer • AuditBoard 
 // --- (End DEFAULT_RESUME constant) ---
 
 
-// Helper function to convert plain text to docx format
+// Helper function to convert plain text to docx format (FIXED and STYLED)
 const createDocx = (plainText) => {
-  // Split text by newlines to get individual paragraphs/lines
-  const lines = plainText.split('\n');
+    // --- STYLED CONFIGURATION ---
+    const BASE_FONT = "Calibri"; // Safe, common font
+    const BODY_SIZE_TWIPS = 11 * 2; // 11pt = 22 twips (docx uses half-points)
+    const HEADER_SIZE_TWIPS = 13 * 2; // 13pt = 26 twips
+    const NAME_SIZE_TWIPS = 16 * 2; // 16pt = 32 twips
+    const ACCENT_COLOR = "1E3A8A"; // Navy color
 
-  // Map each line to a docx Paragraph.
-  // We apply some heuristic to detect bullet points or bold titles.
-  const documentChildren = lines.map(line => {
-    line = line.trim();
-    if (!line) return new Paragraph({ text: '' }); // Empty paragraph for blank lines
+    // Section Headers to look for
+    const sectionHeaders = [
+        "PROFESSIONAL SUMMARY", "CORE COMPETENCIES", 
+        "PROFESSIONAL EXPERIENCE", "CERTIFICATIONS", 
+        "EDUCATION", "KEY ACHIEVEMENTS", "TECHNICAL SKILLS"
+    ];
 
-    let textRuns = [];
-    let bullet = false;
+    // Style for the main name/contact line
+    const nameParagraphOptions = {
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 }, // Minimal space after contact block
+    };
 
-    if (line.startsWith('- ') || line.startsWith('• ')) {
-        bullet = true;
-        line = line.substring(2).trim(); // Remove bullet prefix
-    }
+    // Style for major section headings (H2-level, ALL CAPS, Bold, Navy)
+    const headerParagraphOptions = {
+        heading: HeadingLevel.HEADING_2,
+        // Default spacing for Heading2 in docx is often too large, so we define it:
+        spacing: { before: 200, after: 150 }, 
+        // We set the run properties (font/color) directly on the TextRun below
+    };
+    
+    // Style for normal body text
+    const bodyParagraphOptions = {
+        spacing: { 
+            after: 100, // Minimal space between lines
+            line: 276, // 1.15 line spacing (Single space is 240 twips, 1.15 * 240 ≈ 276)
+        }, 
+        alignment: AlignmentType.LEFT
+    };
 
-    // Simple heuristic for bold: all caps and colon or 'COMPETENCIES' or 'EXPERIENCE'
-    const isHeading = line.toUpperCase() === line || line.endsWith(':') || line.includes('COMPETENCIES') || line.includes('EXPERIENCE') || line.includes('ACHIEVEMENTS') || line.includes('CERTIFICATIONS') || line.includes('EDUCATION') || line.includes('SKILLS');
+    // --- PARSING LOGIC ---
+    const lines = plainText.split('\n');
+    let documentChildren = [];
+    let isFirstLine = true;
+    let isSecondLine = true; // For the contact block line
 
-    textRuns.push(new TextRun({
-        text: line,
-        bold: isHeading,
-        font: "Arial",
-        size: 22, // 11pt
-    }));
+    lines.forEach(line => {
+        line = line.trim();
 
-    return new Paragraph({
-        children: textRuns,
-        spacing: { after: 100 }, // Small spacing after each line (in twips)
-        bullet: bullet ? { level: 0 } : undefined,
+        if (!line) {
+            // Add a clean paragraph break
+            if (documentChildren.length > 0 && !(documentChildren[documentChildren.length - 1].options.text === '')) {
+                documentChildren.push(new Paragraph({ text: '' }));
+            }
+            return;
+        }
+
+        // 1. Name Line (first line)
+        if (isFirstLine) {
+            documentChildren.push(
+                new Paragraph({
+                    ...nameParagraphOptions,
+                    children: [
+                        new TextRun({ 
+                            text: line, 
+                            font: BASE_FONT, 
+                            size: NAME_SIZE_TWIPS, // 16pt
+                            bold: true,
+                        }),
+                    ],
+                })
+            );
+            isFirstLine = false;
+            return;
+        }
+
+        // 2. Contact Line (second line)
+        if (isSecondLine) {
+            documentChildren.push(
+                new Paragraph({
+                    ...nameParagraphOptions,
+                    alignment: AlignmentType.CENTER,
+                    children: [
+                        new TextRun({ 
+                            text: line, 
+                            font: BASE_FONT, 
+                            size: BODY_SIZE_TWIPS, // 11pt
+                        }),
+                    ],
+                })
+            );
+            isSecondLine = false;
+            return;
+        }
+
+        // 3. Section Headers
+        if (sectionHeaders.includes(line.toUpperCase())) {
+            documentChildren.push(
+                new Paragraph({
+                    ...headerParagraphOptions,
+                    children: [
+                        new TextRun({
+                            text: line.toUpperCase(),
+                            font: BASE_FONT,
+                            size: HEADER_SIZE_TWIPS, // 13pt
+                            bold: true,
+                            color: ACCENT_COLOR, // Navy
+                        }),
+                    ],
+                    border: {
+                        bottom: {
+                            color: ACCENT_COLOR,
+                            space: 5,
+                            value: "single",
+                            size: 6, // line thickness
+                        },
+                    },
+                })
+            );
+            return;
+        }
+
+        // 4. Bullet Points
+        const isBullet = line.startsWith('- ') || line.startsWith('• ');
+        if (isBullet) {
+            const textContent = line.substring(line.indexOf(' ') + 1).trim();
+            documentChildren.push(
+                new Paragraph({
+                    children: [
+                        new TextRun({ 
+                            text: textContent, 
+                            font: BASE_FONT, 
+                            size: BODY_SIZE_TWIPS 
+                        }),
+                    ],
+                    bullet: { level: 0 },
+                    // Use a slightly larger left indent for list items
+                    indent: { left: 400 }, 
+                    spacing: { after: 50 }, 
+                })
+            );
+        } else {
+            // 5. Standard Text (Job titles, descriptive text, etc.)
+            // Bold heuristic: Job Title line (contains | or - Present)
+            const isBold = line.includes(' | ') || line.includes('– Present') || line.endsWith(':');
+
+            documentChildren.push(
+                new Paragraph({
+                    ...bodyParagraphOptions,
+                    children: [
+                        new TextRun({ 
+                            text: line, 
+                            bold: isBold, 
+                            font: BASE_FONT, 
+                            size: BODY_SIZE_TWIPS 
+                        }),
+                    ],
+                })
+            );
+        }
     });
-  });
 
-  // Create the document
-  const doc = new Document({
-    sections: [{
-      properties: {},
-      children: documentChildren,
-    }],
-  });
+    // Create the document with specified margins
+    const doc = new Document({
+        styles: {
+            paragraphStyles: [
+                // Set default Normal style (Fallback for all non-styled text)
+                {
+                    id: "Normal",
+                    name: "Normal",
+                    run: {
+                        font: BASE_FONT,
+                        size: BODY_SIZE_TWIPS,
+                    },
+                    paragraph: {
+                        spacing: { line: 276 },
+                    }
+                }
+            ],
+        },
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        // Converted from inches to Twips (1 inch = 1440 twips)
+                        top: 0.75 * 1440,    // 0.75"
+                        right: 0.70 * 1440,   // 0.7"
+                        bottom: 0.75 * 1440, // 0.75"
+                        left: 0.70 * 1440,   // 0.7"
+                    }
+                }
+            },
+            children: documentChildren,
+        }],
+    });
 
-  return doc;
+    return doc;
 };
 
 
@@ -121,7 +272,8 @@ const downloadDocx = async (content, documentType, companyName) => {
     if (!content) return;
     try {
         const doc = createDocx(content);
-        const buffer = await Packer.toBuffer(doc);
+        const buffer = await Packer.toBuffer(doc); 
+        
         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
         
         const firstLetter = companyName.trim().charAt(0).toUpperCase();
@@ -131,8 +283,8 @@ const downloadDocx = async (content, documentType, companyName) => {
 
         saveAs(blob, fileName);
     } catch (error) {
-        console.error("Failed to generate or save DOCX:", error);
-        alert('Failed to generate DOCX file. See console for details.');
+        console.error("CRITICAL DOCX GENERATION ERROR:", error); 
+        alert(`Failed to generate DOCX file. Please check the console for details on the structure error: ${error.message}`);
     }
 };
 
@@ -259,7 +411,7 @@ export default function NoninoResumeOptimizer() {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>${fileName}</title>
+        <title>${fileName} - Preview (Save as PDF)</title>
         <meta charset="UTF-8">
         <style>
           * {
