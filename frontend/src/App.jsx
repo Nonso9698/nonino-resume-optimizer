@@ -176,12 +176,17 @@ export default function NoninoResumeOptimizer() {
     }
   };
 
- const convertTextToParagraphs = (text) => {
+const convertTextToParagraphs = (text) => {
   const lines = text.split('\n');
   const paragraphs = [];
   let isFirstLine = true;
   let inEducationSection = false;
-  let nextLineIsDegree = false;
+  
+  // ADD: Extra line break at the very top to push content down
+  paragraphs.push(new Paragraph({ 
+    text: "",
+    spacing: { after: 0 }
+  }));
   
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
@@ -202,25 +207,26 @@ export default function NoninoResumeOptimizer() {
         children: [new TextRun({ 
           text: trimmedLine,
           bold: true,
-          size: 28,
+          size: 28,  // 14pt
           font: "Calibri"
         })],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 80 }
+        spacing: { after: 20 }  // CHANGED: Reduced from 80 to 20 (tighter spacing)
       }));
       return;
     }
     
-    // Contact info line (second line) - Centered, 10pt
+    // Contact info line (second line) - Centered, 9pt, BOLD
     if (index === 1) {
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
-          size: 20,
+          bold: true,           // ADDED: Make it bold
+          size: 18,             // CHANGED: From 20 (10pt) to 18 (9pt)
           font: "Calibri"
         })],
         alignment: AlignmentType.CENTER,
-        spacing: { after: 80 }
+        spacing: { after: 120 }  // CHANGED: From 80 to 120 for proper spacing to next section
       }));
       return;
     }
@@ -246,32 +252,34 @@ export default function NoninoResumeOptimizer() {
       return;
     }
     
-    // In Education section - detect school vs degree
+    // In Education section - handle university and degree lines properly
     if (inEducationSection && !trimmedLine.startsWith('-')) {
-      if (trimmedLine.match(/^(master|bachelor|associate|phd|diploma|doctor)/i)) {
+      // Check if this is a degree line (starts with degree keywords)
+      if (trimmedLine.match(/^(●\s*)?(master|bachelor|associate|phd|diploma|doctor)/i)) {
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
-            text: trimmedLine,
-            size: 18,
+            text: trimmedLine.replace(/^●\s*/, ''),  // Remove bullet if present
+            size: 20,  // 10pt
             font: "Calibri"
           })],
+          bullet: {
+            level: 0
+          },
           spacing: { after: 30 }
         }));
-        nextLineIsDegree = false;
         return;
       }
       
-      if (!nextLineIsDegree && !trimmedLine.includes('|')) {
+      // Otherwise it's a university line (with city and dates)
+      if (trimmedLine.includes('|')) {
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: trimmedLine,
-            bold: true,
-            size: 20,
+            size: 20,  // 10pt, not bold
             font: "Calibri"
           })],
           spacing: { before: 50, after: 15 }
         }));
-        nextLineIsDegree = true;
         return;
       }
     }
@@ -313,7 +321,6 @@ export default function NoninoResumeOptimizer() {
     // Bullet points - 10pt
     if (trimmedLine.startsWith('-')) {
       inEducationSection = false;
-      nextLineIsDegree = false;
       const bulletText = trimmedLine.substring(1).trim();
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
@@ -341,6 +348,7 @@ export default function NoninoResumeOptimizer() {
   });
   
   return paragraphs;
+};
 };
   const openInWord = async (content, documentType) => {
   try {
