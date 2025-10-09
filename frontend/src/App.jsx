@@ -177,366 +177,353 @@ export default function NoninoResumeOptimizer() {
     }
   };
 
-  const convertTextToParagraphs = (text) => {
-    const lines = text.split('\n');
-    const paragraphs = [];
-    let isFirstLine = true;
-    let inEducationSection = false;
+// REPLACE both convertTextToParagraphs AND downloadAsPDF functions in App.jsx
+
+// 1. WORD DOCUMENT FUNCTION - Fixed Education Alignment
+const convertTextToParagraphs = (text) => {
+  const lines = text.split('\n');
+  const paragraphs = [];
+  let isFirstLine = true;
+  let inEducationSection = false;
+  
+  paragraphs.push(new Paragraph({ 
+    text: "",
+    spacing: { after: 0 }
+  }));
+  
+  lines.forEach((line, index) => {
+    const trimmedLine = line.trim();
     
-    paragraphs.push(new Paragraph({ 
-      text: "",
-      spacing: { after: 0 }
-    }));
+    if (trimmedLine === '') {
+      paragraphs.push(new Paragraph({ 
+        text: "",
+        spacing: { after: 20 }
+      }));
+      return;
+    }
     
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim();
+    // First line (Name) - Centered, 16pt, Bold
+    if (isFirstLine && trimmedLine.length > 0) {
+      isFirstLine = false;
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          bold: true,
+          size: 32,
+          font: "Calibri"
+        })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 20 }
+      }));
+      return;
+    }
+    
+    // Contact info line - Centered, 9pt, BOLD
+    if (index === 1) {
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          bold: true,
+          size: 18,
+          font: "Calibri"
+        })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 120 }
+      }));
+      return;
+    }
+    
+    // Section Headers (ALL CAPS)
+    if (trimmedLine === trimmedLine.toUpperCase() && 
+        trimmedLine.length < 50 && 
+        !trimmedLine.startsWith('-') &&
+        !trimmedLine.startsWith('•') &&
+        !trimmedLine.includes('|')) {
       
-      if (trimmedLine === '') {
-        paragraphs.push(new Paragraph({ 
-          text: "",
-          spacing: { after: 20 }
-        }));
-        return;
-      }
+      inEducationSection = trimmedLine.includes('EDUCATION');
       
-      if (isFirstLine && trimmedLine.length > 0) {
-        isFirstLine = false;
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          bold: true,
+          size: 24,
+          font: "Calibri",
+          color: "1E3A8A"
+        })],
+        spacing: { before: 80, after: 40 }
+      }));
+      return;
+    }
+    
+    // EDUCATION SECTION - Fixed alignment
+    if (inEducationSection) {
+      // Degree line - starts with bullet or degree keywords
+      if (trimmedLine.match(/^[•●\-]\s*(master|bachelor|associate|phd|diploma|doctor)/i) ||
+          trimmedLine.match(/^(master|bachelor|associate|phd|diploma|doctor)/i)) {
+        const degreeText = trimmedLine.replace(/^[•●\-]\s*/, '');
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
-            text: trimmedLine,
-            bold: true,
-            size: 32,
-            font: "Calibri"
-          })],
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 20 }
-        }));
-        return;
-      }
-      
-      if (index === 1) {
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: trimmedLine,
-            bold: true,
-            size: 18,
-            font: "Calibri"
-          })],
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 120 }
-        }));
-        return;
-      }
-      
-      if (trimmedLine === trimmedLine.toUpperCase() && 
-          trimmedLine.length < 50 && 
-          !trimmedLine.startsWith('-') &&
-          !trimmedLine.includes('|')) {
-        
-        inEducationSection = trimmedLine.includes('EDUCATION');
-        
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: trimmedLine,
-            bold: true,
-            size: 24,
-            font: "Calibri",
-            color: "1E3A8A"
-          })],
-          spacing: { before: 80, after: 40 }
-        }));
-        return;
-      }
-      
-      if (inEducationSection && !trimmedLine.startsWith('-')) {
-        if (trimmedLine.match(/^(●\s*)?(master|bachelor|associate|phd|diploma|doctor)/i)) {
-          paragraphs.push(new Paragraph({
-            children: [new TextRun({ 
-              text: trimmedLine.replace(/^●\s*/, ''),
-              size: 20,
-              font: "Calibri"
-            })],
-            bullet: {
-              level: 0
-            },
-            spacing: { after: 30 }
-          }));
-          return;
-        }
-        
-        if (trimmedLine.includes('|')) {
-          paragraphs.push(new Paragraph({
-            children: [new TextRun({ 
-              text: trimmedLine,
-              size: 20,
-              font: "Calibri"
-            })],
-            spacing: { before: 50, after: 15 }
-          }));
-          return;
-        }
-      }
-      
-      if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
-        inEducationSection = false;
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: trimmedLine,
-            bold: true,
-            size: 18,
-            font: "Calibri"
-          })],
-          spacing: { after: 30 }
-        }));
-        return;
-      }
-      
-      if (!inEducationSection && 
-          !trimmedLine.startsWith('-') && 
-          trimmedLine !== trimmedLine.toUpperCase() &&
-          !trimmedLine.includes('|') &&
-          index > 2 &&
-          lines[index + 1] && lines[index + 1].includes('|')) {
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: trimmedLine,
-            bold: true,
-            size: 22,
-            font: "Calibri"
-          })],
-          spacing: { before: 60, after: 15 }
-        }));
-        return;
-      }
-      
-      if (trimmedLine.startsWith('-')) {
-        inEducationSection = false;
-        const bulletText = trimmedLine.substring(1).trim();
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ 
-            text: bulletText,
+            text: degreeText,
             size: 20,
             font: "Calibri"
           })],
           bullet: {
             level: 0
           },
-          spacing: { after: 30 }
+          spacing: { after: 10 }  // Tight spacing after degree
         }));
         return;
       }
       
+      // University line - contains | (comes right after degree)
+      if (trimmedLine.includes('|') && !trimmedLine.startsWith('-') && !trimmedLine.startsWith('•')) {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: trimmedLine,
+            size: 20,
+            font: "Calibri"
+          })],
+          indent: {
+            left: 360  // Indent to align with bullet text (same as bullet content)
+          },
+          spacing: { after: 40, before: 0 }  // Space after for next degree
+        }));
+        return;
+      }
+    }
+    
+    // Company line (contains |)
+    if (trimmedLine.includes('|') && !trimmedLine.startsWith('-') && !trimmedLine.startsWith('•')) {
+      inEducationSection = false;
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
-          size: 20,
+          bold: true,
+          size: 18,
           font: "Calibri"
         })],
         spacing: { after: 30 }
       }));
-    });
-    
-    return paragraphs;
-  };
-
-  const openInWord = async (content, documentType) => {
-    try {
-      const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
-      const fileName = documentType === 'resume' 
-        ? `King_${firstLetter}_Resume`
-        : `King_${firstLetter}_CoverLetter`;
-
-      const contentParagraphs = convertTextToParagraphs(content);
-
-      const doc = new Document({
-        sections: [{
-          properties: {
-            page: {
-              margin: {
-                top: 1080,
-                bottom: 1080,
-                left: 1008,
-                right: 1008
-              }
-            }
-          },
-          children: contentParagraphs,
-        }],
-        styles: {
-          default: {
-            document: {
-              run: {
-                font: "Calibri",
-                size: 20
-              },
-              paragraph: {
-                spacing: {
-                  line: 240,
-                  after: 30
-                }
-              }
-            }
-          }
-        }
-      });
-
-      const blob = await Packer.toBlob(doc);
-      saveAs(blob, `${fileName}.docx`);
-    } catch (error) {
-      console.error('Error creating Word document:', error);
-      alert('Error creating Word document: ' + error.message);
+      return;
     }
-  };
+    
+    // Job Role Title
+    if (!inEducationSection && 
+        !trimmedLine.startsWith('-') && 
+        !trimmedLine.startsWith('•') &&
+        trimmedLine !== trimmedLine.toUpperCase() &&
+        !trimmedLine.includes('|') &&
+        index > 2 &&
+        lines[index + 1] && lines[index + 1].trim().includes('|')) {
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: trimmedLine,
+          bold: true,
+          size: 22,
+          font: "Calibri"
+        })],
+        spacing: { before: 60, after: 15 }
+      }));
+      return;
+    }
+    
+    // Bullet points
+    if (trimmedLine.startsWith('-') || trimmedLine.startsWith('•')) {
+      inEducationSection = false;
+      const bulletText = trimmedLine.replace(/^[-•]\s*/, '').trim();
+      paragraphs.push(new Paragraph({
+        children: [new TextRun({ 
+          text: bulletText,
+          size: 20,
+          font: "Calibri"
+        })],
+        bullet: {
+          level: 0
+        },
+        spacing: { after: 30 }
+      }));
+      return;
+    }
+    
+    // Regular text
+    paragraphs.push(new Paragraph({
+      children: [new TextRun({ 
+        text: trimmedLine,
+        size: 20,
+        font: "Calibri"
+      })],
+      spacing: { after: 30 }
+    }));
+  });
+  
+  return paragraphs;
+};
 
-  const downloadAsPDF = async (content, documentType) => {
-    try {
-      const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
-      const fileName = documentType === 'resume' 
-        ? `King_${firstLetter}_Resume.pdf`
-        : `King_${firstLetter}_CoverLetter.pdf`;
+// 2. PDF DOWNLOAD FUNCTION - Much Better Formatting
+const downloadAsPDF = async (content, documentType) => {
+  try {
+    const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
+    const fileName = documentType === 'resume' 
+      ? `King_${firstLetter}_Resume.pdf`
+      : `King_${firstLetter}_CoverLetter.pdf`;
 
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'pt',
-        format: 'letter'
-      });
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'letter'
+    });
 
-      doc.setFont('helvetica');
+    doc.setFont('helvetica');
 
-      const lines = content.split('\n');
-      let yPosition = 72;
-      const leftMargin = 72;
-      const rightMargin = 72;
-      const pageWidth = 612;
-      const pageHeight = 792;
-      const contentWidth = pageWidth - leftMargin - rightMargin;
-      let isFirstLine = true;
-      let inEducationSection = false;
+    const lines = content.split('\n');
+    let yPosition = 85;  // Start a bit lower for the blank line effect
+    const leftMargin = 72;
+    const pageWidth = 612;
+    const pageHeight = 792;
+    const contentWidth = pageWidth - leftMargin - 72;
+    let isFirstLine = true;
+    let inEducationSection = false;
+    let lastWasEducationDegree = false;
 
-      lines.forEach((line, index) => {
-        const trimmedLine = line.trim();
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+      
+      if (trimmedLine === '') {
+        yPosition += 8;
+        return;
+      }
+
+      if (yPosition > pageHeight - 80) {
+        doc.addPage();
+        yPosition = 72;
+      }
+
+      // Name - Centered, 16pt, Bold
+      if (isFirstLine && trimmedLine.length > 0) {
+        isFirstLine = false;
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        const textWidth = doc.getTextWidth(trimmedLine);
+        const xPosition = (pageWidth - textWidth) / 2;
+        doc.text(trimmedLine, xPosition, yPosition);
+        yPosition += 10;
+        return;
+      }
+
+      // Contact line - Centered, 9pt, Bold
+      if (index === 1) {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        const textWidth = doc.getTextWidth(trimmedLine);
+        const xPosition = (pageWidth - textWidth) / 2;
+        doc.text(trimmedLine, xPosition, yPosition);
+        yPosition += 28;
+        return;
+      }
+
+      // Section Headers
+      if (trimmedLine === trimmedLine.toUpperCase() && 
+          trimmedLine.length < 50 && 
+          !trimmedLine.startsWith('-') &&
+          !trimmedLine.startsWith('•') &&
+          !trimmedLine.includes('|')) {
         
-        if (trimmedLine === '') {
-          yPosition += 6;
-          return;
-        }
+        inEducationSection = trimmedLine.includes('EDUCATION');
+        lastWasEducationDegree = false;
+        
+        yPosition += 14;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 58, 138);
+        doc.text(trimmedLine, leftMargin, yPosition);
+        doc.setTextColor(0, 0, 0);
+        yPosition += 18;
+        return;
+      }
 
-        if (yPosition > pageHeight - 72) {
-          doc.addPage();
-          yPosition = 72;
-        }
-
-        if (isFirstLine && trimmedLine.length > 0) {
-          isFirstLine = false;
-          yPosition += 12;
-          doc.setFontSize(16);
-          doc.setFont('helvetica', 'bold');
-          const textWidth = doc.getTextWidth(trimmedLine);
-          const xPosition = (pageWidth - textWidth) / 2;
-          doc.text(trimmedLine, xPosition, yPosition);
-          yPosition += 8;
-          return;
-        }
-
-        if (index === 1) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'bold');
-          const textWidth = doc.getTextWidth(trimmedLine);
-          const xPosition = (pageWidth - textWidth) / 2;
-          doc.text(trimmedLine, xPosition, yPosition);
-          yPosition += 24;
-          return;
-        }
-
-        if (trimmedLine === trimmedLine.toUpperCase() && 
-            trimmedLine.length < 50 && 
-            !trimmedLine.startsWith('-') &&
-            !trimmedLine.includes('|')) {
-          
-          inEducationSection = trimmedLine.includes('EDUCATION');
-          
-          yPosition += 12;
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(30, 58, 138);
-          doc.text(trimmedLine, leftMargin, yPosition);
-          doc.setTextColor(0, 0, 0);
-          yPosition += 16;
-          return;
-        }
-
-        if (inEducationSection && !trimmedLine.startsWith('-')) {
-          if (trimmedLine.match(/^(●\s*)?(master|bachelor|associate|phd|diploma|doctor)/i)) {
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            const bulletText = trimmedLine.replace(/^●\s*/, '');
-            doc.text('•', leftMargin, yPosition);
-            const wrappedText = doc.splitTextToSize(bulletText, contentWidth - 20);
-            doc.text(wrappedText, leftMargin + 15, yPosition);
-            yPosition += wrappedText.length * 12 + 4;
-            return;
-          }
-
-          if (trimmedLine.includes('|')) {
-            yPosition += 8;
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            const wrappedText = doc.splitTextToSize(trimmedLine, contentWidth);
-            doc.text(wrappedText, leftMargin, yPosition);
-            yPosition += wrappedText.length * 12 + 4;
-            return;
-          }
-        }
-
-        if (trimmedLine.includes('|') && !trimmedLine.startsWith('-')) {
-          inEducationSection = false;
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'bold');
-          const wrappedText = doc.splitTextToSize(trimmedLine, contentWidth);
-          doc.text(wrappedText, leftMargin, yPosition);
-          yPosition += wrappedText.length * 11 + 4;
-          return;
-        }
-
-        if (!inEducationSection && 
-            !trimmedLine.startsWith('-') && 
-            trimmedLine !== trimmedLine.toUpperCase() &&
-            !trimmedLine.includes('|') &&
-            index > 2 &&
-            lines[index + 1] && lines[index + 1].includes('|')) {
-          yPosition += 10;
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.text(trimmedLine, leftMargin, yPosition);
-          yPosition += 6;
-          return;
-        }
-
-        if (trimmedLine.startsWith('-')) {
-          inEducationSection = false;
-          const bulletText = trimmedLine.substring(1).trim();
+      // EDUCATION SECTION - Proper alignment
+      if (inEducationSection) {
+        // Degree line
+        if (trimmedLine.match(/^[•●\-]?\s*(master|bachelor|associate|phd|diploma|doctor)/i)) {
+          const degreeText = trimmedLine.replace(/^[•●\-]\s*/, '');
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           doc.text('•', leftMargin, yPosition);
-          const wrappedText = doc.splitTextToSize(bulletText, contentWidth - 20);
+          const wrappedText = doc.splitTextToSize(degreeText, contentWidth - 20);
           doc.text(wrappedText, leftMargin + 15, yPosition);
-          yPosition += wrappedText.length * 12 + 4;
+          yPosition += wrappedText.length * 12 + 2;
+          lastWasEducationDegree = true;
           return;
         }
 
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
+        // University line (comes right after degree) - indent to match
+        if (trimmedLine.includes('|') && lastWasEducationDegree) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          const wrappedText = doc.splitTextToSize(trimmedLine, contentWidth - 20);
+          doc.text(wrappedText, leftMargin + 15, yPosition);  // Same indent as bullet text
+          yPosition += wrappedText.length * 12 + 10;
+          lastWasEducationDegree = false;
+          return;
+        }
+      }
+
+      // Company line
+      if (trimmedLine.includes('|') && !trimmedLine.startsWith('-') && !trimmedLine.startsWith('•')) {
+        inEducationSection = false;
+        lastWasEducationDegree = false;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
         const wrappedText = doc.splitTextToSize(trimmedLine, contentWidth);
         doc.text(wrappedText, leftMargin, yPosition);
-        yPosition += wrappedText.length * 12 + 4;
-      });
+        yPosition += wrappedText.length * 11 + 6;
+        return;
+      }
 
-      doc.save(fileName);
-    } catch (error) {
-      console.error('Error creating PDF:', error);
-      alert('Error creating PDF: ' + error.message);
-    }
-  };
+      // Job Role Title
+      if (!inEducationSection && 
+          !trimmedLine.startsWith('-') && 
+          !trimmedLine.startsWith('•') &&
+          trimmedLine !== trimmedLine.toUpperCase() &&
+          !trimmedLine.includes('|') &&
+          index > 2 &&
+          lines[index + 1] && lines[index + 1].trim().includes('|')) {
+        yPosition += 12;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(trimmedLine, leftMargin, yPosition);
+        yPosition += 8;
+        return;
+      }
+
+      // Bullet points
+      if (trimmedLine.startsWith('-') || trimmedLine.startsWith('•')) {
+        inEducationSection = false;
+        lastWasEducationDegree = false;
+        const bulletText = trimmedLine.replace(/^[-•]\s*/, '').trim();
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text('•', leftMargin, yPosition);
+        const wrappedText = doc.splitTextToSize(bulletText, contentWidth - 20);
+        doc.text(wrappedText, leftMargin + 15, yPosition);
+        yPosition += wrappedText.length * 12 + 6;
+        return;
+      }
+
+      // Regular text
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const wrappedText = doc.splitTextToSize(trimmedLine, contentWidth);
+      doc.text(wrappedText, leftMargin, yPosition);
+      yPosition += wrappedText.length * 12 + 6;
+    });
+
+    doc.save(fileName);
+  } catch (error) {
+    console.error('Error creating PDF:', error);
+    alert('Error creating PDF: ' + error.message);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-950">
