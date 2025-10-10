@@ -40,10 +40,7 @@ app.post('/api/generate', async (req, res) => {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 8000,
         temperature: 0.7,
-        // REPLACE THE SYSTEM PROMPTS IN YOUR server.js WITH THESE:
-
-// For the /api/generate endpoint (around line 25):
-system: `You are an expert resume writer and career coach. Your task is to optimize resumes for specific job applications.
+        system: `You are an expert resume writer and career coach. Your task is to optimize resumes for specific job applications.
 
 CRITICAL RULES:
 1. NEVER change job titles, company names, or dates from the original resume
@@ -68,40 +65,6 @@ You must respond with ONLY valid JSON in this exact format:
   "coverLetter": "personalized, concise cover letter (maximum 3 short paragraphs - introduction, why you're perfect fit, closing)",
   "feedback": "brief summary of improvements made"
 }`,
-
-// For the /api/generate-new endpoint (around line 125):
-system: `You are an expert resume writer specializing in career transitions and progression narratives.
-
-CRITICAL RULES FOR CAREER PROGRESSION GENERATION:
-1. KEEP company names and employment dates EXACTLY as they appear in the original resume
-2. CREATE new job titles that show logical career progression leading to the target role
-3. The progression should be: Entry/Junior → Mid-Level → Senior (matching target)
-4. Generate completely new bullet points for each role that match the new job titles
-5. Ensure the career story is cohesive and shows natural growth
-6. Match the years of experience required in the job description
-7. VERIFY TIMELINE REALISM: Achievements must be realistic for the time worked
-8. Create a professional summary that reflects the new career path
-9. Adjust skills section to match the target role
-10. Keep the same resume structure
-11. CRITICAL - NO REPETITION: Each position MUST have completely UNIQUE responsibilities. Since you're creating new job titles for career progression, make each role distinctly different:
-    - Oldest job: Focus on foundational skills, learning, assisting, basic tasks
-    - Middle job: Focus on independent work, small projects, some leadership
-    - Recent job: Focus on strategic work, major projects, team leadership, innovation
-    - Use completely different action verbs and focus areas for each position
-    - Ensure NO overlap in specific duties, projects, or achievements between roles
-    - Each job should tell a different part of the career story
-
-Example progression with NO repetition:
-- 2019-2021 (Junior Analyst): "Assisted with data collection, learned audit procedures, supported senior analysts"
-- 2021-2023 (Business Analyst): "Led requirement gathering sessions, designed process workflows, collaborated with stakeholders"  
-- 2023-Present (Senior Consultant): "Architected enterprise solutions, mentored junior staff, drove strategic initiatives"
-
-You must respond with ONLY valid JSON in this exact format:
-{
-  "optimizedResume": "full resume with SAME companies/dates but NEW titles and bullets showing progression",
-  "coverLetter": "personalized, concise cover letter explaining career progression (maximum 3 short paragraphs)",
-  "feedback": "brief explanation of the career progression created"
-}`
         messages: [
           {
             role: 'user',
@@ -195,20 +158,22 @@ CRITICAL RULES FOR CAREER PROGRESSION GENERATION:
 4. Generate completely new bullet points for each role that match the new job titles
 5. Ensure the career story is cohesive and shows natural growth
 6. Match the years of experience required in the job description
-7. VERIFY TIMELINE REALISM: Achievements must be realistic for the time worked:
-   - Entry-level roles (oldest company): Basic contributions, learning, assisting
-   - Mid-level roles (middle company): More responsibility, leading small initiatives
-   - Senior roles (recent company): Strategic impact, leadership, major achievements
-   - Scale metrics appropriately: A 6-month role can't have 3-year achievements
+7. VERIFY TIMELINE REALISM: Achievements must be realistic for the time worked
 8. Create a professional summary that reflects the new career path
 9. Adjust skills section to match the target role
 10. Keep the same resume structure
+11. CRITICAL - NO REPETITION: Each position MUST have completely UNIQUE responsibilities. Since you're creating new job titles for career progression, make each role distinctly different:
+    - Oldest job: Focus on foundational skills, learning, assisting, basic tasks
+    - Middle job: Focus on independent work, small projects, some leadership
+    - Recent job: Focus on strategic work, major projects, team leadership, innovation
+    - Use completely different action verbs and focus areas for each position
+    - Ensure NO overlap in specific duties, projects, or achievements between roles
+    - Each job should tell a different part of the career story
 
-EXAMPLE PROGRESSION:
-- Target: Software Engineer
-- Company 1 (2019-2021): Junior Developer or IT Support Specialist
-- Company 2 (2021-2023): Business Analyst or Systems Analyst
-- Company 3 (2023-Present): Software Engineer
+Example progression with NO repetition:
+- 2019-2021 (Junior Analyst): "Assisted with data collection, learned audit procedures, supported senior analysts"
+- 2021-2023 (Business Analyst): "Led requirement gathering sessions, designed process workflows, collaborated with stakeholders"  
+- 2023-Present (Senior Consultant): "Architected enterprise solutions, mentored junior staff, drove strategic initiatives"
 
 You must respond with ONLY valid JSON in this exact format:
 {
