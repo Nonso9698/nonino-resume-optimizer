@@ -360,18 +360,62 @@ const convertTextToParagraphs = (text) => {
 };
 
 // 2. PDF DOWNLOAD FUNCTION - Much Better Formatting
-const downloadAsPDF = async (content, documentType) => {
+const openInWord = async (content, documentType) => {
   try {
+    console.log('Starting Word export...');
     const firstLetter = formData.companyName.trim().charAt(0).toUpperCase();
     const fileName = documentType === 'resume' 
-      ? `King_${firstLetter}_Resume.pdf`
-      : `King_${firstLetter}_CoverLetter.pdf`;
+      ? `King_${firstLetter}_Resume`
+      : `King_${firstLetter}_CoverLetter`;
 
-    const doc = new jsPDF({
-      orientation: 'portrait',
-      unit: 'pt',
-      format: 'letter'
+    console.log('Converting to paragraphs...');
+    const contentParagraphs = convertTextToParagraphs(content);
+
+    console.log('Creating document...');
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: 1080,
+              bottom: 1080,
+              left: 1008,
+              right: 1008
+            }
+          }
+        },
+        children: contentParagraphs,
+      }],
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Calibri",
+              size: 20
+            },
+            paragraph: {
+              spacing: {
+                line: 240,
+                after: 30
+              }
+            }
+          }
+        }
+      }
     });
+
+    console.log('Packing document...');
+    const blob = await Packer.toBlob(doc);
+    console.log('Blob created, size:', blob.size);
+    
+    console.log('Saving file...');
+    saveAs(blob, `${fileName}.docx`);
+    console.log('File save triggered!');
+  } catch (error) {
+    console.error('Error creating Word document:', error);
+    alert('Error creating Word document: ' + error.message);
+  }
+};
 
     doc.setFont('helvetica');
 
