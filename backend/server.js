@@ -51,13 +51,30 @@ CRITICAL RULES:
 6. Focus on results and measurable outcomes
 7. Keep the same resume structure and sections
 8. VERIFY TIMELINE REALISM: Ensure all achievements, metrics, and accomplishments are realistic and achievable within the actual time period worked at each organization.
-9. CRITICAL - NO REPETITION: Each position must have UNIQUE responsibilities and achievements. Do NOT repeat the same duties across different jobs. Each role should showcase different skills, projects, and accomplishments to demonstrate growth and diverse experience. If similar tasks were performed, describe them from different angles or with different focus areas.
 
-Examples of avoiding repetition:
-- If "risk assessment" appears in one role, use "compliance auditing" or "control testing" in another
-- If "managed vendor relationships" is in one job, use "coordinated third-party evaluations" in another
-- Vary the metrics, tools, and specific achievements across each position
-- Show progression: entry-level duties in older jobs, more strategic work in recent positions
+9. CRITICAL - TECHNOLOGY AND SKILL DISTRIBUTION:
+   - MOST RECENT ROLE ONLY: Should directly address the CORE requirements from the job description (e.g., if job asks for ServiceNow, only the most recent role should heavily feature ServiceNow experience)
+   - PREVIOUS ROLES: Should showcase DIFFERENT but COMPLEMENTARY skills and technologies that build toward the target role
+   - DO NOT repeat the same specific technology/tool across all positions unless it genuinely makes sense
+   - Each role should demonstrate different aspects of your expertise
+
+10. NO REPETITION OF RESPONSIBILITIES: Each position must have UNIQUE achievements and focus areas:
+    - If "risk assessment" appears in one role, use "compliance auditing" or "control testing" in another
+    - If "managed vendor relationships" is in one job, use "coordinated third-party evaluations" in another
+    - Vary the metrics, tools, and specific achievements across each position
+    - Show progression: entry-level duties in older jobs, more strategic work in recent positions
+
+11. REALISTIC TECHNOLOGY ADOPTION:
+    - Consider when technologies were adopted in the industry
+    - Don't claim expertise in tools that didn't exist or weren't widely used during that time period
+    - Most recent role: Current technologies from job description
+    - Middle roles: Transitional technologies and foundational skills
+    - Older roles: Focus on fundamental skills and earlier technologies
+
+Example approach for a ServiceNow-focused job:
+- Current Role: Heavy ServiceNow implementation, ITSM processes, automation
+- Previous Role: ITIL framework, process improvement, different ticketing system
+- Earlier Role: Basic IT support, documentation, customer service
 
 You must respond with ONLY valid JSON in this exact format:
 {
@@ -78,8 +95,10 @@ ${currentResume}
 
 Please generate:
 1. An optimized resume that keeps the EXACT job titles, companies, and dates but rewrites bullets to align with the job description
-2. A personalized, conversational cover letter (maximum one-third page)
-3. Brief feedback on improvements made
+2. Remember: Only the MOST RECENT role should heavily feature the core technologies from the job description
+3. Previous roles should show different, complementary skills that build toward the target role
+4. A personalized, conversational cover letter (maximum one-third page)
+5. Brief feedback on improvements made
 
 Respond with ONLY valid JSON in the format specified in the system prompt.`
           }
@@ -162,18 +181,30 @@ CRITICAL RULES FOR CAREER PROGRESSION GENERATION:
 8. Create a professional summary that reflects the new career path
 9. Adjust skills section to match the target role
 10. Keep the same resume structure
-11. CRITICAL - NO REPETITION: Each position MUST have completely UNIQUE responsibilities. Since you're creating new job titles for career progression, make each role distinctly different:
-    - Oldest job: Focus on foundational skills, learning, assisting, basic tasks
-    - Middle job: Focus on independent work, small projects, some leadership
-    - Recent job: Focus on strategic work, major projects, team leadership, innovation
-    - Use completely different action verbs and focus areas for each position
-    - Ensure NO overlap in specific duties, projects, or achievements between roles
-    - Each job should tell a different part of the career story
 
-Example progression with NO repetition:
-- 2019-2021 (Junior Analyst): "Assisted with data collection, learned audit procedures, supported senior analysts"
-- 2021-2023 (Business Analyst): "Led requirement gathering sessions, designed process workflows, collaborated with stakeholders"  
-- 2023-Present (Senior Consultant): "Architected enterprise solutions, mentored junior staff, drove strategic initiatives"
+11. CRITICAL - TECHNOLOGY AND SKILL DISTRIBUTION:
+    - MOST RECENT ROLE ONLY: Should directly implement the CORE technologies from the job description
+    - PREVIOUS ROLES: Should showcase DIFFERENT technologies and skills that logically led to current expertise
+    - DO NOT spread the same specific technology across all positions
+    - Create a realistic technology journey
+
+12. NO REPETITION - UNIQUE PROGRESSION STORY:
+    - OLDEST JOB (Entry Level): Foundation building, learning fundamentals, basic tools, assisting senior staff
+    - MIDDLE JOB (Mid-Level): Independent projects, different technologies/methodologies, team collaboration
+    - RECENT JOB (Senior Level): Strategic implementation of target technologies, leadership, innovation
+    - Each role must be distinctly different with no overlapping responsibilities
+
+13. REALISTIC TECHNOLOGY TIMELINE:
+    - Consider when technologies emerged and became mainstream
+    - Don't claim expertise in tools before they were widely adopted
+    - Show natural technology evolution (e.g., older tools → modern tools)
+
+Example for a ServiceNow-focused Senior Consultant role:
+- 2019-2021 (IT Analyst): "Documented processes, analyzed workflows, supported ITIL adoption, used basic ticketing systems"
+- 2021-2023 (Business Systems Analyst): "Designed process improvements, managed change requests, implemented automation workflows in different platforms"
+- 2023-Present (Senior IT Consultant): "Led ServiceNow implementations, architected ITSM solutions, transformed enterprise service delivery"
+
+Notice how ONLY the most recent role mentions ServiceNow, while previous roles build the foundation with related but different experiences.
 
 You must respond with ONLY valid JSON in this exact format:
 {
@@ -194,9 +225,11 @@ ${currentResume}
 
 Please generate:
 1. A NEW resume that keeps the EXACT companies and dates but creates logical job title progression leading to the target role
-2. Each position should have appropriate responsibilities matching that career level
-3. A personalized cover letter explaining the career progression
-4. Brief feedback on the progression strategy used
+2. ONLY the most recent position should heavily feature the core technologies from the job description
+3. Previous positions should show different, foundational skills that built toward current expertise
+4. Each position must have completely unique responsibilities with no repetition
+5. A personalized cover letter explaining the career progression
+6. Brief feedback on the progression strategy used
 
 Respond with ONLY valid JSON in the format specified in the system prompt.`
           }
