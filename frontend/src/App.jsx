@@ -1,3 +1,5 @@
+// NONINO RESUME OPTIMIZER - VERSION FINAL_v2 - October 31, 2025
+// Font Sizes: Name=18pt, Contact=10pt, Headers=13pt, JobTitles=11.5pt, Company=11pt, Body=10.5pt
 import React, { useState, useEffect } from 'react';
 import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Eye, RefreshCw, Edit3, RotateCcw, Clock } from 'lucide-react';
 import { Document, Paragraph, TextRun, Packer, AlignmentType } from 'docx';
