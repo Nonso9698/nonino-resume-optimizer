@@ -464,8 +464,7 @@ export default function NoninoResumeOptimizer() {
           default: {
             document: {
               run: {
-                font: "Calibri",
-                size: 20
+                font: "Calibri"
               },
               paragraph: {
                 spacing: {
