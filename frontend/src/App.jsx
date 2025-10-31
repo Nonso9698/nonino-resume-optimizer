@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Eye, RefreshCw } from 'lucide-react';
+import { FileText, Briefcase, Upload, Loader2, CheckCircle, AlertCircle, History, Sparkles, Eye, RefreshCw, Edit3, RotateCcw, Clock } from 'lucide-react';
 import { Document, Paragraph, TextRun, Packer, AlignmentType } from 'docx';
 import { saveAs } from 'file-saver';
 import { jsPDF } from 'jspdf';
@@ -81,6 +81,11 @@ export default function NoninoResumeOptimizer() {
   const [isUsingDefaultResume, setIsUsingDefaultResume] = useState(true);
   const [scanHistory, setScanHistory] = useState([]);
   const [mode, setMode] = useState('optimizer');
+  const [showAdjustment, setShowAdjustment] = useState(false);
+  const [adjustmentRequest, setAdjustmentRequest] = useState('');
+  const [isAdjusting, setIsAdjusting] = useState(false);
+  const [adjustmentHistory, setAdjustmentHistory] = useState([]);
+  const [originalResults, setOriginalResults] = useState(null);
 
   const API_URL = '/api';
 
@@ -163,17 +168,88 @@ export default function NoninoResumeOptimizer() {
 
       const result = await response.json();
 
-      setResults({
+      const newResults = {
         optimizedResume: result.data.optimizedResume,
         coverLetter: result.data.coverLetter,
         feedback: result.data.feedback
-      });
+      };
+
+      setResults(newResults);
+      setOriginalResults(newResults);
+      setAdjustmentHistory([]);
+      setShowAdjustment(false);
+      setAdjustmentRequest('');
 
       saveScanToHistory(formData.roleTitle, formData.companyName, mode);
     } catch (err) {
       setError(err.message || 'Failed to generate content. Please try again.');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleAdjustment = async () => {
+    if (!adjustmentRequest.trim()) {
+      setError('Please describe what you want to adjust.');
+      return;
+    }
+
+    setIsAdjusting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_URL}/adjust`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          adjustmentRequest: adjustmentRequest,
+          currentResume: results.optimizedResume,
+          currentCoverLetter: results.coverLetter,
+          jobDescription: formData.jobDescription,
+          roleTitle: formData.roleTitle,
+          documentType: 'both'
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Request failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      const adjustmentRecord = {
+        id: Date.now(),
+        request: adjustmentRequest,
+        summary: result.data.changesSummary,
+        timestamp: new Date().toLocaleTimeString()
+      };
+
+      setAdjustmentHistory(prev => [...prev, adjustmentRecord]);
+
+      setResults({
+        optimizedResume: result.data.adjustedResume,
+        coverLetter: result.data.adjustedCoverLetter,
+        feedback: results.feedback
+      });
+
+      setAdjustmentRequest('');
+      
+    } catch (err) {
+      setError(err.message || 'Failed to process adjustment. Please try again.');
+    } finally {
+      setIsAdjusting(false);
+    }
+  };
+
+  const revertToOriginal = () => {
+    if (originalResults) {
+      setResults(originalResults);
+      setAdjustmentHistory([]);
+      setAdjustmentRequest('');
+      setShowAdjustment(false);
     }
   };
 
@@ -598,6 +674,8 @@ export default function NoninoResumeOptimizer() {
               onClick={() => {
                 setMode('optimizer');
                 setResults(null);
+                setAdjustmentHistory([]);
+                setShowAdjustment(false);
               }}
               className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                 mode === 'optimizer'
@@ -612,6 +690,8 @@ export default function NoninoResumeOptimizer() {
               onClick={() => {
                 setMode('new-resume');
                 setResults(null);
+                setAdjustmentHistory([]);
+                setShowAdjustment(false);
               }}
               className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                 mode === 'new-resume'
@@ -819,7 +899,7 @@ export default function NoninoResumeOptimizer() {
               <div className="space-y-6">
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4 flex items-start shadow-lg">
                   <CheckCircle className="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-bold text-green-800 mb-1">
                       Generation Complete!
                     </h3>
@@ -827,6 +907,92 @@ export default function NoninoResumeOptimizer() {
                       Your {mode === 'optimizer' ? 'optimized' : 'new'} resume and cover letter are ready to view.
                     </p>
                   </div>
+                  {adjustmentHistory.length > 0 && (
+                    <button
+                      onClick={revertToOriginal}
+                      className="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      Revert to Original
+                    </button>
+                  )}
+                </div>
+
+                {/* Adjustment History */}
+                {adjustmentHistory.length > 0 && (
+                  <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Clock className="w-4 h-4 text-amber-600" />
+                      <h3 className="font-bold text-amber-900 text-sm">Adjustment History ({adjustmentHistory.length})</h3>
+                    </div>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {adjustmentHistory.map((adj) => (
+                        <div key={adj.id} className="bg-white rounded-lg p-2.5 border border-amber-200">
+                          <div className="text-xs text-gray-600 mb-1">
+                            <span className="font-semibold">Request:</span> {adj.request}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            <span className="font-semibold">Changes:</span> {adj.summary}
+                          </div>
+                          <div className="text-[10px] text-gray-400 mt-1">{adj.timestamp}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Request Adjustment Panel */}
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border-2 border-purple-200">
+                  <button
+                    onClick={() => setShowAdjustment(!showAdjustment)}
+                    className="w-full flex items-center justify-between text-left"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Edit3 className="w-5 h-5 text-purple-600" />
+                      <h2 className="text-lg font-bold text-gray-800">Request Adjustments</h2>
+                    </div>
+                    <div className="text-purple-600">
+                      {showAdjustment ? '▼' : '▶'}
+                    </div>
+                  </button>
+
+                  {showAdjustment && (
+                    <div className="mt-4 space-y-3">
+                      <p className="text-sm text-gray-600">
+                        Tell the AI what you'd like to change. Examples:
+                      </p>
+                      <ul className="text-xs text-gray-500 space-y-1 ml-4">
+                        <li>• "Make the Bank of America role emphasize more customer-facing work"</li>
+                        <li>• "Reduce the metrics in the Wells Fargo section"</li>
+                        <li>• "Add more cloud security experience to the most recent role"</li>
+                        <li>• "Make the tone more conversational and less formal"</li>
+                      </ul>
+                      <textarea
+                        placeholder="Describe what you want to adjust..."
+                        value={adjustmentRequest}
+                        onChange={(e) => setAdjustmentRequest(e.target.value)}
+                        rows={4}
+                        className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition resize-none text-sm"
+                      />
+                      <button
+                        onClick={handleAdjustment}
+                        disabled={isAdjusting || !adjustmentRequest.trim()}
+                        className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                      >
+                        {isAdjusting ? (
+                          <>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Processing Adjustment...
+                          </>
+                        ) : (
+                          <>
+                            <Edit3 className="w-5 h-5 mr-2" />
+                            Apply Adjustment
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6">
@@ -916,6 +1082,10 @@ export default function NoninoResumeOptimizer() {
                     }));
                     setUploadedFileName('');
                     setIsUsingDefaultResume(true);
+                    setAdjustmentHistory([]);
+                    setShowAdjustment(false);
+                    setAdjustmentRequest('');
+                    setOriginalResults(null);
                   }}
                   className="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl"
                 >
