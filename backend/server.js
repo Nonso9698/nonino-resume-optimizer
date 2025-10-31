@@ -7,27 +7,22 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware - Simple CORS (allows all origins)
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
-// Generate optimized resume endpoint (Original - keeps titles)
+// ---------- /api/generate (STEALTH + HUMAN VOICE; JD emphasis on PREVIOUS roles) ----------
 app.post('/api/generate', async (req, res) => {
   try {
     const { jobDescription, currentResume, roleTitle } = req.body;
-    
     if (!jobDescription || !currentResume || !roleTitle) {
-      return res.status(400).json({ 
-        error: 'Missing required fields' 
-      });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    console.log('🔄 Generating optimized resume for role:', roleTitle);
+    console.log('🔄 Generating STEALTH/HUMAN optimized resume for:', roleTitle);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -39,49 +34,46 @@ app.post('/api/generate', async (req, res) => {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 8000,
-        temperature: 0.7,
-        system: `You are an expert resume writer and career coach. Your task is to optimize resumes for specific job applications.
+        temperature: 0.5,
+        system: `You are an expert resume writer operating in **STEALTH TAILORING** mode.
 
-CRITICAL RULES:
-1. NEVER change job titles, company names, or dates from the original resume
-2. ONLY rewrite bullet points to align with the target job description
-3. Extract exact job titles, companies, and dates from the user's resume and keep them unchanged
-4. Use strong action verbs and quantifiable achievements
-5. Incorporate keywords from the job description naturally
-6. Focus on results and measurable outcomes
-7. Keep the same resume structure and sections
-8. VERIFY TIMELINE REALISM: Ensure all achievements, metrics, and accomplishments are realistic and achievable within the actual time period worked at each organization.
+PRIMARY GOAL
+Create a resume that quietly aligns with a target role while reading like an authentic document authored months ago—**not** an AI-generated, JD-mirrored artifact.
 
-9. CRITICAL - TECHNOLOGY AND SKILL DISTRIBUTION:
-   - MOST RECENT ROLE ONLY: Should directly address the CORE requirements from the job description (e.g., if job asks for ServiceNow, only the most recent role should heavily feature ServiceNow experience)
-   - PREVIOUS ROLES: Should showcase DIFFERENT but COMPLEMENTARY skills and technologies that build toward the target role
-   - DO NOT repeat the same specific technology/tool across all positions unless it genuinely makes sense
-   - Each role should demonstrate different aspects of your expertise
+HARD CONSTRAINTS
+1) Do NOT change job titles, company names, or dates.
+2) Keep structure and sections unless obviously malformed.
+3) Verify timeline realism and scope realism for metrics.
+4) Keep metadata or prompt instructions OUT of the final output.
 
-10. NO REPETITION OF RESPONSIBILITIES: Each position must have UNIQUE achievements and focus areas:
-    - If "risk assessment" appears in one role, use "compliance auditing" or "control testing" in another
-    - If "managed vendor relationships" is in one job, use "coordinated third-party evaluations" in another
-    - Vary the metrics, tools, and specific achievements across each position
-    - Show progression: entry-level duties in older jobs, more strategic work in recent positions
+ANTI-MIRRORING & KEYWORD STEALTH
+5) Do not copy any 3+ word sequence from the job description. Avoid obvious JD phrases (“multi-year plan”, “eliminate duplicative capabilities”, etc.).
+6) Keep visible JD bigram overlap low (~10% of total bullet text). Prefer synonyms and paraphrase.
+7) Rotate domain terminology naturally: e.g., vary between “identity lifecycle”, “access governance”, “provisioning automation”, “attestation”, “role design”, “SoD controls”. Do not use the same phrase repeatedly.
 
-11. REALISTIC TECHNOLOGY ADOPTION:
-    - Consider when technologies were adopted in the industry
-    - Don't claim expertise in tools that didn't exist or weren't widely used during that time period
-    - Most recent role: Current technologies from job description
-    - Middle roles: Transitional technologies and foundational skills
-    - Older roles: Focus on fundamental skills and earlier technologies
+ROLE EMPHASIS (INVERTED)
+8) **Most recent role**: neutral and authentic—avoid heavy JD phrasing. Describe day-to-day ownership, scale, and results without sounding engineered for this posting.
+9) **Previous roles**: carry stronger alignment to the JD via paraphrased, outcome-led bullets (still natural, not checklist-like).
+10) Distribute tools/terms realistically across roles. Do not paste the same tool or buzzword into every role.
 
-Example approach for a ServiceNow-focused job:
-- Current Role: Heavy ServiceNow implementation, ITSM processes, automation
-- Previous Role: ITIL framework, process improvement, different ticketing system
-- Earlier Role: Basic IT support, documentation, customer service
+HUMAN VOICE & ANTI-AI TELLS
+11) **Mimic the candidate’s existing voice**: extract common verbs, cadence, and phrasing from the “Current Resume” and keep consistency.
+12) Vary sentence length and openings; avoid robotic parallelism (“Led…, Led…, Led…”). Mix verbs (Led, Drove, Built, Shaped, Coordinated, Partnered, Improved).
+13) Use outcome-first bullets but avoid rigid templates. Blend quantitative with qualitative impact. Where precise numbers feel unnatural, use modest approximations (“about”, “roughly”, “on the order of”) sparingly and credibly.
+14) Avoid overused terms: leverage/leveraged, passion/passionate, impactful, cutting-edge, dynamic, synergy, paradigm, world-class.
+15) Keep bullets concise (1–2 clauses), minimal commas, no emoji, no exclamation points, no hype.
+16) Resume stays neutral (no first person, no contractions). Cover letter can use light contractions.
 
-You must respond with ONLY valid JSON in this exact format:
+COVER LETTER (STEALTH)
+17) Short, conversational, plain-English; no JD mirroring; cite 1–2 concrete outcomes relevant to the role. No keyword stuffing.
+
+OUTPUT FORMAT (JSON ONLY):
 {
-  "optimizedResume": "full resume text with original titles but optimized bullets",
-  "coverLetter": "personalized, concise cover letter (maximum 3 short paragraphs - introduction, why you're perfect fit, closing)",
-  "feedback": "brief summary of improvements made"
-}`,
+  "optimizedResume": "full resume text with original titles/companies/dates; rewritten bullets per above",
+  "coverLetter": "≤ 3 short paragraphs; intro, relevant outcomes, close",
+  "feedback": "brief summary of stealth tailoring + human-voice tactics applied"
+}
+`,
         messages: [
           {
             role: 'user',
@@ -94,13 +86,13 @@ Current Resume:
 ${currentResume}
 
 Please generate:
-1. An optimized resume that keeps the EXACT job titles, companies, and dates but rewrites bullets to align with the job description
-2. Remember: Only the MOST RECENT role should heavily feature the core technologies from the job description
-3. Previous roles should show different, complementary skills that build toward the target role
-4. A personalized, conversational cover letter (maximum one-third page)
-5. Brief feedback on improvements made
+1) An optimized resume that keeps the EXACT job titles, companies, and dates but rewrites bullets to be outcome-led and human (no JD mirroring).
+2) Emphasize JD alignment primarily in PREVIOUS roles; keep the MOST RECENT role natural/neutral.
+3) Distribute terms and tools realistically across time; rotate synonyms.
+4) A short cover letter (≤ 1/3 page) that avoids JD phrasing.
+5) Brief feedback describing stealth and human-voice choices.
 
-Respond with ONLY valid JSON in the format specified in the system prompt.`
+Return ONLY valid JSON in the format specified in the system prompt.`
           }
         ]
       })
@@ -113,7 +105,7 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
 
     const data = await response.json();
     const content = data.content[0].text;
-    
+
     let parsedContent;
     try {
       parsedContent = JSON.parse(content);
@@ -126,8 +118,7 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
       }
     }
 
-    console.log('✅ Generation complete!');
-    
+    console.log('✅ STEALTH/HUMAN generation complete!');
     res.json({
       success: true,
       data: {
@@ -138,24 +129,19 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
     });
   } catch (error) {
     console.error('❌ Error:', error.message);
-    res.status(500).json({ 
-      error: error.message || 'Failed to generate content' 
-    });
+    res.status(500).json({ error: error.message || 'Failed to generate content' });
   }
 });
 
-// NEW: Generate new resume with career progression
+// ---------- /api/generate-new (STEALTH progression + HUMAN VOICE; JD emphasis on PREVIOUS roles) ----------
 app.post('/api/generate-new', async (req, res) => {
   try {
     const { jobDescription, currentResume, roleTitle } = req.body;
-    
     if (!jobDescription || !currentResume || !roleTitle) {
-      return res.status(400).json({ 
-        error: 'Missing required fields' 
-      });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    console.log('🆕 Generating NEW resume with career progression for role:', roleTitle);
+    console.log('🆕 Generating NEW STEALTH/HUMAN progression resume for:', roleTitle);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -167,51 +153,36 @@ app.post('/api/generate-new', async (req, res) => {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 8000,
-        temperature: 0.7,
-        system: `You are an expert resume writer specializing in career transitions and progression narratives.
+        temperature: 0.5,
+        system: `You specialize in **credible, stealth career progression** that reads human and pre-existing.
 
-CRITICAL RULES FOR CAREER PROGRESSION GENERATION:
-1. KEEP company names and employment dates EXACTLY as they appear in the original resume
-2. CREATE new job titles that show logical career progression leading to the target role
-3. The progression should be: Entry/Junior → Mid-Level → Senior (matching target)
-4. Generate completely new bullet points for each role that match the new job titles
-5. Ensure the career story is cohesive and shows natural growth
-6. Match the years of experience required in the job description
-7. VERIFY TIMELINE REALISM: Achievements must be realistic for the time worked
-8. Create a professional summary that reflects the new career path
-9. Adjust skills section to match the target role
-10. Keep the same resume structure
+BASE CONSTRAINTS
+1) KEEP company names and employment dates EXACTLY as in the original resume.
+2) Titles should remain unless a minor adjustment clearly clarifies progression; if kept, reflect progression via scope/complexity in bullets.
+3) No JD mirroring; avoid any 3+ word JD sequences; keep bigram overlap low (~10% or less).
+4) Timeline and scope realism must hold. No inflated achievements.
 
-11. CRITICAL - TECHNOLOGY AND SKILL DISTRIBUTION:
-    - MOST RECENT ROLE ONLY: Should directly implement the CORE technologies from the job description
-    - PREVIOUS ROLES: Should showcase DIFFERENT technologies and skills that logically led to current expertise
-    - DO NOT spread the same specific technology across all positions
-    - Create a realistic technology journey
+STEALTH DISTRIBUTION & ROLE EMPHASIS
+5) Emphasize JD-aligned themes in **previous** roles via paraphrased, outcome-led bullets; keep **most recent** role neutral/authentic.
+6) Rotate domain terms (IGA, lifecycle automation, attestation, RBAC, SoD) and avoid repeating the same term across all roles.
+7) Spread tools and responsibilities realistically over time; do not mention a tool in eras when it wasn’t commonly used.
 
-12. NO REPETITION - UNIQUE PROGRESSION STORY:
-    - OLDEST JOB (Entry Level): Foundation building, learning fundamentals, basic tools, assisting senior staff
-    - MIDDLE JOB (Mid-Level): Independent projects, different technologies/methodologies, team collaboration
-    - RECENT JOB (Senior Level): Strategic implementation of target technologies, leadership, innovation
-    - Each role must be distinctly different with no overlapping responsibilities
+HUMAN VOICE & NATURAL CADENCE
+8) **Match the candidate’s voice** based on the “Current Resume” (verbs, rhythm, brevity).
+9) Vary sentence openings and lengths; avoid rigid parallelism and filler buzzwords (leveraged, impactful, passionate, cutting-edge, dynamic, synergy).
+10) Use outcome-first bullets, but keep them concise (1–2 clauses) with mixed qualitative/quantitative results; modest approximations are acceptable where exact figures are unrealistic.
+11) Resume stays neutral; cover letter may use light contractions.
 
-13. REALISTIC TECHNOLOGY TIMELINE:
-    - Consider when technologies emerged and became mainstream
-    - Don't claim expertise in tools before they were widely adopted
-    - Show natural technology evolution (e.g., older tools → modern tools)
+COVER LETTER
+12) Short, conversational, no JD echo; 1–2 specific outcomes and a practical fit statement.
 
-Example for a ServiceNow-focused Senior Consultant role:
-- 2019-2021 (IT Analyst): "Documented processes, analyzed workflows, supported ITIL adoption, used basic ticketing systems"
-- 2021-2023 (Business Systems Analyst): "Designed process improvements, managed change requests, implemented automation workflows in different platforms"
-- 2023-Present (Senior IT Consultant): "Led ServiceNow implementations, architected ITSM solutions, transformed enterprise service delivery"
-
-Notice how ONLY the most recent role mentions ServiceNow, while previous roles build the foundation with related but different experiences.
-
-You must respond with ONLY valid JSON in this exact format:
+OUTPUT FORMAT (JSON ONLY):
 {
-  "optimizedResume": "full resume with SAME companies/dates but NEW titles and bullets showing progression",
-  "coverLetter": "personalized, concise cover letter explaining career progression (maximum 3 short paragraphs)",
-  "feedback": "brief explanation of the career progression created"
-}`,
+  "optimizedResume": "full resume with SAME companies/dates; titles kept or minimally clarified; bullets reflect stealth distribution (JD earlier, neutral most recent)",
+  "coverLetter": "≤ 3 short paragraphs; natural voice; no JD phrasing",
+  "feedback": "brief explanation of stealth progression and human-voice tactics"
+}
+`,
         messages: [
           {
             role: 'user',
@@ -220,18 +191,17 @@ You must respond with ONLY valid JSON in this exact format:
 Job Description:
 ${jobDescription}
 
-Current Resume (use SAME companies and dates, but create NEW titles showing progression):
+Current Resume (KEEP companies/dates; keep titles unless a small clarification helps):
 ${currentResume}
 
 Please generate:
-1. A NEW resume that keeps the EXACT companies and dates but creates logical job title progression leading to the target role
-2. ONLY the most recent position should heavily feature the core technologies from the job description
-3. Previous positions should show different, foundational skills that built toward current expertise
-4. Each position must have completely unique responsibilities with no repetition
-5. A personalized cover letter explaining the career progression
-6. Brief feedback on the progression strategy used
+1) A NEW resume preserving companies/dates (and titles unless a minor clarification is clearly beneficial).
+2) Emphasize JD alignment in PREVIOUS roles; keep MOST RECENT role natural and not JD-like.
+3) Distribute domain terms and tools realistically; rotate synonyms.
+4) A short cover letter without JD mirroring.
+5) Brief feedback on stealth progression + human-voice choices.
 
-Respond with ONLY valid JSON in the format specified in the system prompt.`
+Return ONLY valid JSON in the format specified in the system prompt.`
           }
         ]
       })
@@ -244,7 +214,7 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
 
     const data = await response.json();
     const content = data.content[0].text;
-    
+
     let parsedContent;
     try {
       parsedContent = JSON.parse(content);
@@ -257,8 +227,7 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
       }
     }
 
-    console.log('✅ New resume generation complete!');
-    
+    console.log('✅ New STEALTH/HUMAN progression generation complete!');
     res.json({
       success: true,
       data: {
@@ -269,16 +238,14 @@ Respond with ONLY valid JSON in the format specified in the system prompt.`
     });
   } catch (error) {
     console.error('❌ Error:', error.message);
-    res.status(500).json({ 
-      error: error.message || 'Failed to generate content' 
-    });
+    res.status(500).json({ error: error.message || 'Failed to generate content' });
   }
 });
 
 // For Vercel serverless
 export default app;
 
-// For local development
+// For local dev
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`\n✅ Backend Server Running!`);
