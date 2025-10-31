@@ -41,6 +41,14 @@ Wells Fargo | Charlotte, NC | December 2019 – August 2023
 - Performed quarterly IT General Controls testing for 12 critical applications, identifying and tracking remediation of control deficiencies with business process owners and achieving 88% resolution rate
 - Contributed to SOC 2 Type II audit processes through detailed control documentation and testing evidence, maintaining clean audit opinions across 8 business areas
 
+Junior Security Analyst
+Healthfirst | Full-time | May 2016 - December 2019
+-	Collaborated within an Agile team to facilitate security assessments and audits, ensuring compliance with regulatory frameworks and enhancing the overall security posture.
+-	Engaged in daily stand-ups and sprint planning sessions to prioritize security tasks and align efforts with cross-functional teams for effective risk mitigation.
+-	Developed and maintained documentation for security policies and procedures, contributing to a shared knowledge base that improved team efficiency and compliance awareness.
+-	Participated in retrospectives to continuously improve security processes and workflows, fostering a culture of ongoing improvement and adaptation within the team.
+
+
 CERTIFICATIONS
 - Certified Information Systems Auditor (CISA)
 - CompTIA Security+ (SY0-701)
