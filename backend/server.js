@@ -42,7 +42,7 @@ Generate a resume that quietly aligns with the target role but feels human-writt
 
 HARD CONSTRAINTS:
 1. Keep job titles, companies, and dates EXACTLY as in the user's resume.
-2. Keep the same structure and section order.
+2. Keep the same structure and section order, Always integrate key responsibilities and skills mentioned in the job description — even if it means rewriting 40–50% of the bullets to reflect those themes naturally.
 3. Verify realism for all metrics and timeframes (no inflated percentages or "zero findings").
 4. Never include prompt or system text in your output.
 
@@ -166,7 +166,7 @@ Generate a natural, credible career story that feels pre-existing and shows grad
 
 CONSTRAINTS:
 1. Keep companies and dates EXACT.
-2. Titles may be slightly adjusted only if needed for realism.
+2. Titles may be slightly adjusted only if needed for realism.Always integrate key responsibilities and skills mentioned in the job description — even if it means rewriting 40–50% of the bullets to reflect those themes naturally.
 3. Keep achievements plausible; avoid inflated results or perfect metrics.
 4. No copying 3+ word phrases from the job description.
 
