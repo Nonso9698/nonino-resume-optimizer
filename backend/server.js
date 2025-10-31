@@ -40,6 +40,8 @@ app.post('/api/generate', async (req, res) => {
 CRITICAL MANDATE:
 You MUST rewrite 60-70% of all bullet points to genuinely reflect the job description requirements while sounding completely natural and human-written. This is not optional - the resume must substantively change to match the target role.
 
+⚠️ ENFORCEMENT: If you do not follow these rules, the output will be rejected and you will need to regenerate.
+
 HARD CONSTRAINTS:
 1. Keep job titles, companies, and dates EXACTLY as in the user's resume.
 2. Keep the same structure and section order.
@@ -73,11 +75,14 @@ STEALTH / HUMAN RULES:
 20. Replace AI-typical words: "leverage," "impactful," "cutting-edge," "passionate," "synergy," "robust" with plain language.
 21. FORBIDDEN PHRASE COMBINATIONS (never use these together in the same role):
     - "risk-informed" + "decision-making" (use "decisions based on security priorities" instead)
-    - "security-focused" + "culture" (use "organization-wide security awareness" instead)
+    - "security-focused" + "culture" OR just "security-focused" alone (use "security awareness" or "security understanding" instead)
     - "business enablement" + "needs" (use "business requirements" or "operational needs" instead)
     - "cross-functional" + "collaboration" + "stakeholders" in same bullet
-    - More than 2 instances of "stakeholder(s)" in any single role
+    - More than 2 instances of "stakeholder(s)" in any single role - COUNT CAREFULLY
     - "drive" or "driving" more than once per role
+    - "proven track record" (extremely AI-typical)
+    - "advocate for" (sounds corporate, use "push for" or "help with" instead)
+    - Starting more than 2 bullets in a role with similar verbs (Support... Support... = BAD)
 22. Prefer conversational sentences: "Worked with engineering teams to validate fixes" not "Collaborated cross-functionally to drive remediation closure."
 
 PROFESSIONAL SUMMARY:
@@ -127,6 +132,41 @@ COVER LETTER:
 52. Third paragraph: Short, polite close expressing interest in discussing further.
 53. Use contractions naturally ("I've worked with..." not "I have worked with...").
 54. Avoid repeating exact phrases from resume - show same concepts differently.
+
+CONCRETE EXAMPLES - STUDY THESE:
+
+❌ BAD (AI-generated, detectable):
+- "Support information security risk management for healthcare clients by conducting HITRUST assessments"
+- "Advocate for security risk management through vendor evaluation processes"
+- "Drive security compliance through gap assessments"
+- "Manage risk dashboards in Splunk that deliver practical security metrics"
+
+✅ GOOD (Human-written, natural):
+- "Work with healthcare clients to evaluate security risks in their cloud setups, helping teams understand what needs fixing and why"
+- "Run vendor security reviews for 50+ suppliers, scoring their controls and tracking where they need to improve"
+- "Check payment systems for PCI compliance gaps, then coordinate with IT to close issues within deadlines"
+- "Built Splunk dashboards that show execs where we stand on compliance without overwhelming them with details"
+
+❌ BAD - Professional Summary:
+"Proven track record building risk-focused cultures through cross-functional collaboration and delivering quantitative risk metrics to technical and business audiences."
+
+✅ GOOD - Professional Summary:
+"Experienced working with IT, legal, and business teams to improve security awareness while creating clear risk reports for both technical staff and executives."
+
+VOICE PATTERN EXAMPLES:
+
+❌ BAD (repetitive verbs):
+- Support information security risk programs...
+- Support stakeholder engagement...
+- Advocate for security risk management...
+
+✅ GOOD (varied openings):
+- Work with healthcare teams to assess cloud security risks...
+- Run vendor security reviews covering 50+ critical suppliers...
+- Help IT teams fix compliance gaps through targeted remediation plans...
+- Built risk dashboards that eliminated one-third of manual reporting...
+
+Remember: REAL humans don't write in perfect corporate patterns. They vary their language, use conversational tone, and don't repeat the same structures.
 
 OUTPUT FORMAT (VALID JSON ONLY):
 {
@@ -221,6 +261,8 @@ app.post('/api/generate-new', async (req, res) => {
 CRITICAL MANDATE:
 You MUST rewrite 60-70% of content to create a credible career story that naturally leads to the target role. This requires substantive changes, not minor tweaks.
 
+⚠️ ENFORCEMENT: If you do not follow these rules, the output will be rejected and you will need to regenerate.
+
 CONSTRAINTS:
 1. Keep companies and dates EXACT.
 2. Titles may be slightly adjusted ONLY if it improves realism and progression logic.
@@ -256,10 +298,13 @@ HUMAN TONE:
 22. Drop buzzwords: "leverage," "synergy," "impactful," "cutting-edge," "passionate," "robust"
 23. FORBIDDEN PHRASE COMBINATIONS:
     - "risk-informed" + "decision-making"
-    - "security-focused" + "culture"
+    - "security-focused" + "culture" OR just "security-focused" alone
     - "business enablement" + "needs"
     - "cross-functional" + "collaboration" + "stakeholders" in same bullet
-    - More than 2 instances of "stakeholder(s)" in any single role
+    - More than 2 instances of "stakeholder(s)" in any single role - COUNT CAREFULLY
+    - "proven track record" (extremely AI-typical)
+    - "advocate for" (use "push for" or "help with" instead)
+    - Starting more than 2 bullets in a role with similar verbs
 24. Keep metrics realistic and modest: "about 30%," "roughly 15 hours," "a few weeks"
 25. Mix quantitative and qualitative results naturally.
 26. AUTHENTICITY MARKERS:
@@ -304,6 +349,20 @@ COVER LETTER:
 49. Second paragraph: Why this role/company appeals.
 50. Third paragraph: Short, polite close.
 51. Use contractions; avoid repeating exact resume phrases.
+
+CONCRETE EXAMPLES - STUDY THESE:
+
+❌ BAD (AI-generated, detectable):
+- "Support information security risk management for healthcare clients"
+- "Advocate for security risk management through vendor evaluation"
+- "Drive security compliance through gap assessments"
+
+✅ GOOD (Human-written, natural):
+- "Work with healthcare clients to evaluate security risks in their cloud setups"
+- "Run vendor security reviews for 50+ suppliers, scoring controls and tracking improvements"
+- "Check payment systems for PCI gaps, then coordinate with IT to close issues"
+
+Remember: Vary your verb usage, use conversational tone, and avoid perfect corporate patterns.
 
 OUTPUT FORMAT (VALID JSON ONLY):
 {
