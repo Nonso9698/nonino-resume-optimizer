@@ -942,26 +942,28 @@ export default function NoninoResumeOptimizer() {
                 )}
 
                 {/* Request Adjustment Panel */}
-                <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border-2 border-purple-200">
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border-4 border-pink-400">
                   <button
                     onClick={() => setShowAdjustment(!showAdjustment)}
                     className="w-full flex items-center justify-between text-left"
                   >
-                    <div className="flex items-center gap-2">
-                      <Edit3 className="w-5 h-5 text-purple-600" />
-                      <h2 className="text-lg font-bold text-gray-800">Request Adjustments</h2>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-pink-500 p-2 rounded-lg">
+                        <Edit3 className="w-6 h-6 text-white" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-gray-800">Request Adjustments</h2>
                     </div>
-                    <div className="text-purple-600">
+                    <div className="text-pink-600 text-2xl font-bold">
                       {showAdjustment ? '▼' : '▶'}
                     </div>
                   </button>
 
                   {showAdjustment && (
                     <div className="mt-4 space-y-3">
-                      <p className="text-sm text-gray-600">
+                      <p className="text-base text-gray-600 font-medium">
                         Tell the AI what you'd like to change. Examples:
                       </p>
-                      <ul className="text-xs text-gray-500 space-y-1 ml-4">
+                      <ul className="text-sm text-gray-500 space-y-1 ml-4">
                         <li>• "Make the Bank of America role emphasize more customer-facing work"</li>
                         <li>• "Reduce the metrics in the Wells Fargo section"</li>
                         <li>• "Add more cloud security experience to the most recent role"</li>
@@ -972,21 +974,21 @@ export default function NoninoResumeOptimizer() {
                         value={adjustmentRequest}
                         onChange={(e) => setAdjustmentRequest(e.target.value)}
                         rows={4}
-                        className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition resize-none text-sm"
+                        className="w-full px-4 py-3 border-2 border-pink-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition resize-none text-base"
                       />
                       <button
                         onClick={handleAdjustment}
                         disabled={isAdjusting || !adjustmentRequest.trim()}
-                        className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                        className="w-full bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg"
                       >
                         {isAdjusting ? (
                           <>
-                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            <Loader2 className="w-6 h-6 mr-2 animate-spin" />
                             Processing Adjustment...
                           </>
                         ) : (
                           <>
-                            <Edit3 className="w-5 h-5 mr-2" />
+                            <Edit3 className="w-6 h-6 mr-2" />
                             Apply Adjustment
                           </>
                         )}
