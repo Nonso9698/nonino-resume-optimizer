@@ -276,14 +276,14 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // First line (Name) - Centered, 16pt, Bold
+      // First line (Name) - Centered, 18pt, Bold
       if (isFirstLine && trimmedLine.length > 0) {
         isFirstLine = false;
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: trimmedLine,
             bold: true,
-            size: 32,
+            size: 36,
             font: "Calibri"
           })],
           alignment: AlignmentType.CENTER,
@@ -292,13 +292,13 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Contact info line - Centered, 9pt, NORMAL (not bold)
+      // Contact info line - Centered, 10pt, NOT BOLD
       if (index === 1) {
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: trimmedLine,
             bold: false,
-            size: 18,
+            size: 20,
             font: "Calibri"
           })],
           alignment: AlignmentType.CENTER,
@@ -307,7 +307,7 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Section Headers (ALL CAPS)
+      // Section Headers (ALL CAPS) - 13pt Bold
       if (trimmedLine === trimmedLine.toUpperCase() && 
           trimmedLine.length < 50 && 
           !trimmedLine.startsWith('-') &&
@@ -320,7 +320,7 @@ export default function NoninoResumeOptimizer() {
           children: [new TextRun({ 
             text: trimmedLine,
             bold: true,
-            size: 24,
+            size: 26,
             font: "Calibri",
             color: "1E3A8A"
           })],
@@ -364,14 +364,14 @@ export default function NoninoResumeOptimizer() {
         }
       }
       
-      // Company line
+      // Company line (with | and location/dates) - 11pt Bold
       if (trimmedLine.includes('|') && !trimmedLine.startsWith('-') && !trimmedLine.startsWith('•')) {
         inEducationSection = false;
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: trimmedLine,
             bold: true,
-            size: 18,
+            size: 22,
             font: "Calibri"
           })],
           spacing: { after: 30 }
@@ -379,7 +379,7 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Job Role Title
+      // Job Role Title (appears before company line) - 11.5pt Bold
       if (!inEducationSection && 
           !trimmedLine.startsWith('-') && 
           !trimmedLine.startsWith('•') &&
@@ -391,7 +391,7 @@ export default function NoninoResumeOptimizer() {
           children: [new TextRun({ 
             text: trimmedLine,
             bold: true,
-            size: 22,
+            size: 23,
             font: "Calibri"
           })],
           spacing: { before: 60, after: 15 }
@@ -399,7 +399,7 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Bullet points
+      // Bullet points - 10.5pt
       if (trimmedLine.startsWith('-') || trimmedLine.startsWith('•')) {
         inEducationSection = false;
         const bulletText = trimmedLine.replace(/^[-•]\s*/, '').trim();
@@ -417,7 +417,7 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Regular text
+      // Regular text (Professional Summary content, etc.) - 10.5pt
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
@@ -942,28 +942,28 @@ export default function NoninoResumeOptimizer() {
                 )}
 
                 {/* Request Adjustment Panel */}
-                <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border-4 border-pink-400">
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border-2 border-pink-300">
                   <button
                     onClick={() => setShowAdjustment(!showAdjustment)}
                     className="w-full flex items-center justify-between text-left"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="bg-pink-500 p-2 rounded-lg">
-                        <Edit3 className="w-6 h-6 text-white" />
+                    <div className="flex items-center gap-2">
+                      <div className="bg-pink-500 p-1.5 rounded-lg">
+                        <Edit3 className="w-4 h-4 text-white" />
                       </div>
-                      <h2 className="text-2xl font-bold text-gray-800">Request Adjustments</h2>
+                      <h2 className="text-base font-bold text-gray-800">Request Adjustments</h2>
                     </div>
-                    <div className="text-pink-600 text-2xl font-bold">
+                    <div className="text-pink-600 text-sm font-bold">
                       {showAdjustment ? '▼' : '▶'}
                     </div>
                   </button>
 
                   {showAdjustment && (
                     <div className="mt-4 space-y-3">
-                      <p className="text-base text-gray-600 font-medium">
+                      <p className="text-sm text-gray-600 font-medium">
                         Tell the AI what you'd like to change. Examples:
                       </p>
-                      <ul className="text-sm text-gray-500 space-y-1 ml-4">
+                      <ul className="text-xs text-gray-500 space-y-1 ml-4">
                         <li>• "Make the Bank of America role emphasize more customer-facing work"</li>
                         <li>• "Reduce the metrics in the Wells Fargo section"</li>
                         <li>• "Add more cloud security experience to the most recent role"</li>
@@ -974,21 +974,21 @@ export default function NoninoResumeOptimizer() {
                         value={adjustmentRequest}
                         onChange={(e) => setAdjustmentRequest(e.target.value)}
                         rows={4}
-                        className="w-full px-4 py-3 border-2 border-pink-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition resize-none text-base"
+                        className="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition resize-none text-sm"
                       />
                       <button
                         onClick={handleAdjustment}
                         disabled={isAdjusting || !adjustmentRequest.trim()}
-                        className="w-full bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg"
+                        className="w-full bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white font-bold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm"
                       >
                         {isAdjusting ? (
                           <>
-                            <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Processing Adjustment...
                           </>
                         ) : (
                           <>
-                            <Edit3 className="w-6 h-6 mr-2" />
+                            <Edit3 className="w-4 h-4 mr-2" />
                             Apply Adjustment
                           </>
                         )}
