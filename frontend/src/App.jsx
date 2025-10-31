@@ -292,12 +292,12 @@ export default function NoninoResumeOptimizer() {
         return;
       }
       
-      // Contact info line - Centered, 9pt, BOLD
+      // Contact info line - Centered, 9pt, NORMAL (not bold)
       if (index === 1) {
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: trimmedLine,
-            bold: true,
+            bold: false,
             size: 18,
             font: "Calibri"
           })],
@@ -337,7 +337,7 @@ export default function NoninoResumeOptimizer() {
           paragraphs.push(new Paragraph({
             children: [new TextRun({ 
               text: degreeText,
-              size: 20,
+              size: 21,
               font: "Calibri"
             })],
             bullet: {
@@ -352,7 +352,7 @@ export default function NoninoResumeOptimizer() {
           paragraphs.push(new Paragraph({
             children: [new TextRun({ 
               text: trimmedLine,
-              size: 20,
+              size: 21,
               font: "Calibri"
             })],
             indent: {
@@ -406,7 +406,7 @@ export default function NoninoResumeOptimizer() {
         paragraphs.push(new Paragraph({
           children: [new TextRun({ 
             text: bulletText,
-            size: 20,
+            size: 21,
             font: "Calibri"
           })],
           bullet: {
@@ -421,7 +421,7 @@ export default function NoninoResumeOptimizer() {
       paragraphs.push(new Paragraph({
         children: [new TextRun({ 
           text: trimmedLine,
-          size: 20,
+          size: 21,
           font: "Calibri"
         })],
         spacing: { after: 30 }
